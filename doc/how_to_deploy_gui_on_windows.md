@@ -1,0 +1,1 @@
+use the deploy.bat file, change directory of the used compiler and execute the bat
