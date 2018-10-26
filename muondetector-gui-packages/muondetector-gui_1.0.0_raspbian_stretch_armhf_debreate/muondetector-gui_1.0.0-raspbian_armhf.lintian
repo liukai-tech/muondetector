@@ -1,0 +1,8 @@
+E: muondetector-gui: missing-dependency-on-libc needed by usr/bin/muondetector-gui
+E: muondetector-gui: debian-changelog-file-missing-or-wrong-name
+E: muondetector-gui: copyright-should-refer-to-common-license-file-for-lgpl
+W: muondetector-gui: extra-license-file usr/share/doc/muondetector-gui/LICENSE
+W: muondetector-gui: package-contains-timestamped-gzip usr/share/man/man1/muondetector-gui.1.gz
+E: muondetector-gui: manpage-not-compressed-with-max-compression usr/share/man/man1/muondetector-gui.1.gz
+E: muondetector-gui: md5sums-lists-nonexistent-file usr/bin/muondetector-gu
+W: muondetector-gui: file-missing-in-md5sums usr/bin/muondetector-gui

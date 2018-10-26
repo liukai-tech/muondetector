@@ -2,16 +2,16 @@ Source: muondetector-gui
 Section: net
 Priority: optional
 Maintainer: Marvin Peter <marvin.peter@physik.uni-giessen.de>
-Build-Depends: debhelper (>=9), gcc, qtbase5-dev, qtbase5-dev-tools, qt5-qmake, libqt5serialport5-dev, qtdeclarative5-dev
-Standards-Version: 4.2.1.3
+Build-Depends: debhelper (>=9), qt5-default (>=5.3), libqt5serialport5-dev (>=5.3), qtdeclarative5-dev (>=5.3) 
+Standards-Version: 3.9.6
 Homepage: https://github.com/marvin5300/myon_detector
 
 Package: muondetector-gui
 Architecture: any
-Depends: libqt5quickwidgets5, libqt5widgets5, libqt5network5, libqt5core5a, ${misc:Depends}, ${shlibs:Depends}
+Depends: libqt5gui5 (>=5), libqt5widgets5 (>=5), libqt5core5a (>=5), libqt5quickwidgets5 (>=5.3), libqt5network5 (>=5), ${misc:Depends}, ${shlibs:Depends}
 Description: GUI for monitoring and controlling the muondetector-daemon.
  It connects to muondetector-daemon via TCP. It is based on Qt and C++.
  It lets you change the settings for the muondetector hardware and
- uses qml for displaying the current position on the map if connected 
+ uses qml for displaying the current position on the map if connected
  the muondetector-daemon.
  It is licensed under the GNU Lesser General Public License version 3 (LGPL v3).
