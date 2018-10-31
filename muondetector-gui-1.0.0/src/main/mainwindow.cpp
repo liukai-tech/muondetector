@@ -19,8 +19,14 @@ MainWindow::MainWindow(QWidget *parent) :
     qRegisterMetaType<GeodeticPos>("GeodeticPos");
     ui->setupUi(this);
 	ui->discr1Layout->setAlignment(ui->discr1Slider, Qt::AlignHCenter);
-	ui->discr2Layout->setAlignment(ui->discr2Slider, Qt::AlignHCenter); // aligns the slider in their vertical layout centered
-	QIcon icon("/usr/share/pixmaps/muon.ico");
+    ui->discr2Layout->setAlignment(ui->discr2Slider, Qt::AlignHCenter); // aligns the slider in their vertical layout centered
+#if defined(Q_OS_UNIX)
+        QIcon icon("/usr/share/pixmaps/muon.ico");
+#elif defined(Q_OS_WIN)
+        QIcon icon("muon.ico");
+#else
+        QIcon icon("muon.ico");
+#endif
 	this->setWindowIcon(icon);
 
 	// initialise all ui elements that will be inactive at start
@@ -29,7 +35,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // setup ipBox and load addresses etc.
     addresses = new QStandardItemModel(this);
-	loadSettings("ipAddresses.save", addresses);
+#if defined(Q_OS_UNIX)
+    loadSettings(QString("/usr/share/muondetector-gui/ipAddresses.save"), addresses);
+#elif defined(Q_OS_WIN)
+    loadSettings(QString("ipAddresses.save"), addresses);
+#else
+    loadSettings(QString("ipAddresses.save"), addresses);
+#endif
 	ui->ipBox->setModel(addresses);
 	ui->ipBox->setAutoCompletion(true);
 	ui->ipBox->setEditable(true);
@@ -82,7 +94,13 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
 	emit closeConnection();
-	saveSettings(QString("ipAddresses.save"), addresses);
+#if defined(Q_OS_UNIX)
+    saveSettings(QString("/usr/share/muondetector-gui/ipAddresses.save"), addresses);
+#elif defined(Q_OS_WIN)
+    saveSettings(QString("ipAddresses.save"), addresses);
+#else
+    saveSettings(QString("ipAddresses.save"), addresses);
+#endif
 	delete ui;
 }
 

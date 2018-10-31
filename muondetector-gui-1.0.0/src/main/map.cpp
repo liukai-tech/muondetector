@@ -10,7 +10,13 @@ Map::Map(QWidget *parent) :
     mapUi->setupUi(this);
     mapUi->quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
     QQmlEngine* engine = new QQmlEngine(this);
-    QQmlComponent* component = new QQmlComponent(engine, QUrl::fromLocalFile("qml/mymap.qml"));
+#if defined(Q_OS_UNIX)
+        QQmlComponent* component = new QQmlComponent(engine, QUrl::fromLocalFile("/usr/share/muondetector-gui/qml/mymap.qml"));
+#elif defined(Q_OS_WIN)
+        QQmlComponent* component = new QQmlComponent(engine, QUrl::fromLocalFile("qml/mymap.qml"));
+#else
+        // put error message here
+#endif
     mapComponent = component->create();
     mapUi->quickWidget->setContent(component->url(), component, mapComponent);
     mapUi->quickWidget->show();

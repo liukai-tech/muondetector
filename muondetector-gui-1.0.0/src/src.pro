@@ -21,6 +21,7 @@ TARGET = muondetector-gui
 TEMPLATE = app
 CONFIG += warn_on
 CONFIG += release
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -41,28 +42,33 @@ win32:OBJECTS_DIR = ../build/o/win32
 macx:OBJECTS_DIR = ../build/o/mac
 
 INCLUDEPATH += . \
-    other \
-    main
+    main \
+    qml
+
+INCLUDEPATH += ../../muondetector-shared/src
+
+#unix:DEPENDPATH += . /usr/lib/muondetector-shared
+#unix:INCLUDEPATH += /usr/lib/muondetector-shared
+unix:LIBS += -L/usr/lib/muondetector-shared -lmuondetector-shared
+win32:LIBS += -L../lib -lmuondetector-shared
+win32:INCLUDEPATH += ../bin/lib
+win32:DEPENDPATH += ../bin/lib
+unix:INCLUDEPATH += /usr/lib/muondetector-shared
+unix:DEPENDPATH += /usr/lib/muondetector-shared
+#unix:POST_TARGETDEPS += -L/usr/lib/muondetector-shared -lmuondetector-shared
 
 SOURCES += \
-    other/tcpconnection.cpp \
     main/main.cpp \
     main/mainwindow.cpp \
-    other/tcpmessage.cpp \
     main/settings.cpp \
     main/status.cpp \
     main/map.cpp
 
 HEADERS += \
-    other/tcpconnection.h \
     main/mainwindow.h \
-    other/tcpmessage.h \
-    other/ublox_messages.h \
     main/settings.h \
-    other/ubx_msg_key_name_map.h \
-    other/tcpmessage_keys.h \
     main/status.h \
-    main/map.h
+    main/map.h \
 
 FORMS += \
     main/mainwindow.ui \
@@ -70,5 +76,5 @@ FORMS += \
     main/status.ui \
     main/map.ui
 
-#DISTFILES += \
-#    qml/mymap.qml
+DISTFILES += \
+    qml/mymap.qml
