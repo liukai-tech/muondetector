@@ -1,29 +1,22 @@
 [DEBREATE-0.7.13]
 <<CTRL>>
-Package: muondetector-gui
-Version: 1.0.0-ubuntu
-Maintainer: Marvin Peter <marvin.peter@physik.uni-giessen.de>
+Package: muondetector-daemon
+Version: 1.0.0-raspbian
+Maintainer: Marvin Peter <marvin.peter@physik.uni-giessen.de>
 Section: net
-Source: muondetector-gui
-Homepage: https://github.com/marvin5300/muondetector
-Architecture: amd64
+Architecture: armhf
 Priority: optional
-Depends: libqt5gui5 (>=5), libqt5widgets5 (>=5), libqt5core5a (>=5), libqt5quickwidgets5 (>=5.3), libqt5network5 (>=5), libmuondetector-shared (>=1), qml-module-qtpositioning (>=5), qml-module-qtlocation (>=5), qml-module-qtquick2 (>=5)
-Description: GUI for monitoring and controlling the muondetector-daemon.
- It connects to muondetector-daemon via TCP. It is based on Qt and C++.
- It lets you change the settings for the muondetector hardware and
- uses qml for displaying the current position on the map if connected
- the muondetector-daemon.
+Depends: libqt5core5a (>=5), libqt5network5 (>=5), libmuondetector-shared (>=1), libqt5serialport5 (>=5)
+Description: Daemon that controls the muon detector board
+ It connects to the ublox gps module on the detector board via serial (rx tx) "ubx protocol" and to the other chips on the board via i2c. It is based on Qt and C++ and a little bit of C.
+ It does the measuring in the background and sends the data to the central server.
  It is licensed under the GNU Lesser General Public License version 3 (LGPL v3).
 
 <</CTRL>>
 <<FILES>>
 1
-/home/user/muondetector/muondetector-gui-1.0.0/src/muon.ico -> muon.ico -> /usr/share/pixmaps
-/home/user/muondetector/muondetector-gui-1.0.0/src/qml/mymap.qml -> mymap.qml -> /usr/share/muondetector-gui/qml
-/home/user/muondetector/muondetector-gui-1.0.0/src/ipAddresses.save -> ipAddresses.save -> /usr/share/muondetector-gui
-/home/user/muondetector/muondetector-gui-1.0.0/src/man/man1/muondetector-gui.1.gz -> muondetector-gui.1.gz -> /usr/share/man/man1
-/home/user/muondetector/muondetector-gui-1.0.0/bin/muondetector-gui* -> muondetector-gui -> /bin
+/home/MUONpi217/marvin_temp/muondetector-daemon-1.0.0/src/ubx_rates_config.cfg -> ubx_rates_config.cfg -> /usr/share/muondetector
+/home/MUONpi217/marvin_temp/muondetector-daemon-1.0.0/bin/muondetector-daemon* -> muondetector-daemon -> /bin
 <</FILES>>
 <<SCRIPTS>>
 <<PREINST>>
@@ -33,13 +26,13 @@ Description: GUI for monitoring and controlling the muondetector-daemon.
 1
 #! /bin/bash -e
 
-ln -fs "/bin/muondetector-gui" "/usr/bin/muondetector-gui"
+ln -fs "/bin/muondetector" "/usr/bin/muondetector"
 <</POSTINST>>
 <<PRERM>>
 1
 #! /bin/bash -e
 
-rm -f "/usr/bin/muondetector-gui"
+rm -f "/usr/bin/muondetector"
 <</PRERM>>
 <<POSTRM>>
 0
@@ -47,11 +40,11 @@ rm -f "/usr/bin/muondetector-gui"
 <</SCRIPTS>>
 <<CHANGELOG>>
 <<DEST>>DEFAULT<</DEST>>
-muondetector-gui (1.0.0-ubuntu) bionic; urgency=low
+muondetector-daemon (1.0.0-raspbian) stretch; urgency=low
 
   * Initial release
 
- -- Marvin Peter <marvin.peter@physik.uni-giessen.de>  Fri, 02 Nov 2018 13:08:21 +0100
+ -- Marvin Peter <marvin.peter@physik.uni-giessen.de>  Fri, 02 Nov 2018 15:26:06 +0100
 
 <</CHANGELOG>>
 <<COPYRIGHT>>
@@ -222,17 +215,7 @@ permanent authorization for you to choose that version for the
 Library.
 <</COPYRIGHT>>
 <<MENU>>
-1
-Name=muondetector-gui
-Version=1.0
-Exec=/usr/bin/muondetector-gui
-Comment=Graphical user interface for a muon detector board for raspberry pi
-Icon=/usr/share/pixmaps/muon.ico
-Type=Application
-Terminal=false
-StartupNotify=false
-Encoding=UTF-8
-Categories=Science;Physics;
+0
 <</MENU>>
 <<BUILD>>
 1

@@ -45,16 +45,16 @@ INCLUDEPATH += . \
     main \
     qml
 
-INCLUDEPATH += ../../muondetector-shared/src
+INCLUDEPATH += ../../muondetector-shared-1.0.0/src
 
 #unix:DEPENDPATH += . /usr/lib/muondetector-shared
 #unix:INCLUDEPATH += /usr/lib/muondetector-shared
 unix:LIBS += -L/usr/lib/muondetector-shared -lmuondetector-shared
 win32:LIBS += -L../lib -lmuondetector-shared
 win32:INCLUDEPATH += ../bin/lib
-win32:DEPENDPATH += ../bin/lib
+#win32:DEPENDPATH += ../bin/lib
 unix:INCLUDEPATH += /usr/lib/muondetector-shared
-unix:DEPENDPATH += /usr/lib/muondetector-shared
+#unix:DEPENDPATH += /usr/lib/muondetector-shared
 #unix:POST_TARGETDEPS += -L/usr/lib/muondetector-shared -lmuondetector-shared
 
 SOURCES += \

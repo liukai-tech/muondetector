@@ -1,29 +1,23 @@
 [DEBREATE-0.7.13]
 <<CTRL>>
-Package: muondetector-gui
+Package: libmuondetector-shared
 Version: 1.0.0-ubuntu
-Maintainer: Marvin Peter <marvin.peter@physik.uni-giessen.de>
+Maintainer: Marvin Peter <marvin.peter@physik.uni-giessen.de>
 Section: net
-Source: muondetector-gui
+Source: muondetector-shared
 Homepage: https://github.com/marvin5300/muondetector
 Architecture: amd64
 Priority: optional
-Depends: libqt5gui5 (>=5), libqt5widgets5 (>=5), libqt5core5a (>=5), libqt5quickwidgets5 (>=5.3), libqt5network5 (>=5), libmuondetector-shared (>=1), qml-module-qtpositioning (>=5), qml-module-qtlocation (>=5), qml-module-qtquick2 (>=5)
-Description: GUI for monitoring and controlling the muondetector-daemon.
- It connects to muondetector-daemon via TCP. It is based on Qt and C++.
- It lets you change the settings for the muondetector hardware and
- uses qml for displaying the current position on the map if connected
- the muondetector-daemon.
+Depends: libqt5network5 (>=5), libqt5core5a (>=5)
+Description: Shared library for muondetector.
+ It is used for tcp connection between daemon and gui and holds important definitions.
  It is licensed under the GNU Lesser General Public License version 3 (LGPL v3).
 
 <</CTRL>>
 <<FILES>>
 1
-/home/user/muondetector/muondetector-gui-1.0.0/src/muon.ico -> muon.ico -> /usr/share/pixmaps
-/home/user/muondetector/muondetector-gui-1.0.0/src/qml/mymap.qml -> mymap.qml -> /usr/share/muondetector-gui/qml
-/home/user/muondetector/muondetector-gui-1.0.0/src/ipAddresses.save -> ipAddresses.save -> /usr/share/muondetector-gui
-/home/user/muondetector/muondetector-gui-1.0.0/src/man/man1/muondetector-gui.1.gz -> muondetector-gui.1.gz -> /usr/share/man/man1
-/home/user/muondetector/muondetector-gui-1.0.0/bin/muondetector-gui* -> muondetector-gui -> /bin
+/home/user/muondetector/muondetector-shared-1.0.0/bin/libmuondetector-shared.so.1.0.0* -> libmuondetector-shared.so.1.0.0 -> /usr/lib/muondetector-shared/
+/home/user/muondetector/muondetector-shared-1.0.0/debian/libmuondetector.conf -> libmuondetector.conf -> /etc/ld.so.conf.d/
 <</FILES>>
 <<SCRIPTS>>
 <<PREINST>>
@@ -31,27 +25,32 @@ Description: GUI for monitoring and controlling the muondetector-daemon.
 <</PREINST>>
 <<POSTINST>>
 1
-#! /bin/bash -e
-
-ln -fs "/bin/muondetector-gui" "/usr/bin/muondetector-gui"
+#!/bin/bash -e
+ln -fs "/usr/lib/muondetector-shared/libmuondetector-shared.so.1.0.0" "/usr/lib/muondetector-shared/libmuondetector-shared.so.1.0"
+ln -fs "/usr/lib/muondetector-shared/libmuondetector-shared.so.1.0.0" "/usr/lib/muondetector-shared/libmuondetector-shared.so.1"
+ln -fs "/usr/lib/muondetector-shared/libmuondetector-shared.so.1.0.0" "/usr/lib/muondetector-shared/libmuondetector-shared.so"
+ldconfig
 <</POSTINST>>
 <<PRERM>>
 1
-#! /bin/bash -e
-
-rm -f "/usr/bin/muondetector-gui"
+#!/bin/bash -e
+rm -f "/usr/lib/muondetector-shared/libmuondetector-shared.so.1.0"
+rm -f "/usr/lib/muondetector-shared/libmuondetector-shared.so.1"
+rm -f "/usr/lib/muondetector-shared/libmuondetector-shared.so"
 <</PRERM>>
 <<POSTRM>>
-0
+1
+#!/bin/bash -e
+ldconfig
 <</POSTRM>>
 <</SCRIPTS>>
 <<CHANGELOG>>
 <<DEST>>DEFAULT<</DEST>>
-muondetector-gui (1.0.0-ubuntu) bionic; urgency=low
+libmuondetector-shared (1.0.0-ubuntu) bionic; urgency=low
 
   * Initial release
 
- -- Marvin Peter <marvin.peter@physik.uni-giessen.de>  Fri, 02 Nov 2018 13:08:21 +0100
+ -- Marvin Peter <<marvin.peter@physik.uni-giessen.de>>  Mon, 29 Oct 2018 10:09:58 +0100
 
 <</CHANGELOG>>
 <<COPYRIGHT>>
@@ -222,17 +221,7 @@ permanent authorization for you to choose that version for the
 Library.
 <</COPYRIGHT>>
 <<MENU>>
-1
-Name=muondetector-gui
-Version=1.0
-Exec=/usr/bin/muondetector-gui
-Comment=Graphical user interface for a muon detector board for raspberry pi
-Icon=/usr/share/pixmaps/muon.ico
-Type=Application
-Terminal=false
-StartupNotify=false
-Encoding=UTF-8
-Categories=Science;Physics;
+0
 <</MENU>>
 <<BUILD>>
 1
