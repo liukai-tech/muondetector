@@ -4,13 +4,14 @@
 #
 #-------------------------------------------------
 win32{
-include ( C:/Qwt-6.1.3/features/qwt.prf )
+include ( C:/qwt-6.1.3/features/qwt.prf )
 }
 
 QT       += core \
           widgets \
           gui \
           network
+QT       += svg
 QT       += quickwidgets
 
 #greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -62,13 +63,15 @@ SOURCES += \
     main/mainwindow.cpp \
     main/settings.cpp \
     main/status.cpp \
-    main/map.cpp
+    main/map.cpp \
+    main/plotcustom.cpp
 
 HEADERS += \
     main/mainwindow.h \
     main/settings.h \
     main/status.h \
     main/map.h \
+    main/plotcustom.h
 
 FORMS += \
     main/mainwindow.ui \
@@ -78,3 +81,5 @@ FORMS += \
 
 DISTFILES += \
     qml/mymap.qml
+
+RESOURCES +=
