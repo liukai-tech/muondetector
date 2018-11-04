@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="PlotCustom" name="widget" native="true"/>
+    <widget class="PlotCustom" name="ratePlot" native="true"/>
    </item>
   </layout>
  </widget>

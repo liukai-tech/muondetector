@@ -3,9 +3,12 @@
 #include <qwt.h>
 void PlotCustom::initialize(){
     // Show a title
-       setTitle( "This is an Example" );
+       setTitle( "Rate Statistics" );
        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-       setAutoReplot(true);
+       grid = new QwtPlotGrid();
+       grid->setPen(QColor::QColor("black"), 0.1, Qt::SolidLine);
+       grid->attach(this);
+       setStyleSheet("background-color: white; border: 0px;");
        replot();
        show();
 }

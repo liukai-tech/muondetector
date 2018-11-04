@@ -81,5 +81,3 @@ FORMS += \
 
 DISTFILES += \
     qml/mymap.qml
-
-RESOURCES +=

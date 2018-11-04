@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>myon detector overview</string>
+   <string>muondetector-gui</string>
   </property>
   <property name="locale">
    <locale language="English" country="Germany"/>
@@ -398,7 +398,7 @@
         <property name="usesScrollButtons">
          <bool>false</bool>
         </property>
-        <widget class="QWidget" name="">
+        <widget class="QWidget" name="widget">
          <attribute name="title">
           <string/>
          </attribute>
