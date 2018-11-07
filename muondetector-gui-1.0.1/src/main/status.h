@@ -2,6 +2,8 @@
 #define STATUS_H
 
 #include <QWidget>
+#include <QVector>
+#include <QPointF>
 
 namespace Ui {
 class Status;
@@ -15,8 +17,12 @@ public:
     explicit Status(QWidget *parent = nullptr);
     ~Status();
 
+public slots:
+    void onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates);
 private:
     Ui::Status *statusUi;
+    QVector<QPointF> xorSamples;
+    QVector<QPointF> andSamples;
 };
 
 #endif // STATUS_H

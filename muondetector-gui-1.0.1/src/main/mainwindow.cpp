@@ -35,13 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // setup ipBox and load addresses etc.
     addresses = new QStandardItemModel(this);
-#if defined(Q_OS_UNIX)
-    loadSettings(QString("/usr/share/muondetector-gui/ipAddresses.save"), addresses);
-#elif defined(Q_OS_WIN)
-    loadSettings(QString("ipAddresses.save"), addresses);
-#else
-    loadSettings(QString("ipAddresses.save"), addresses);
-#endif
+    loadSettings(addresses);
 	ui->ipBox->setModel(addresses);
 	ui->ipBox->setAutoCompletion(true);
 	ui->ipBox->setEditable(true);
@@ -69,17 +63,20 @@ MainWindow::MainWindow(QWidget *parent) :
     if (automaticRatePoll){
         ratePollTimer.setInterval(3000);
         ratePollTimer.setSingleShot(false);
-        connect(&ratePollTimer, &QTimer::timeout, this, &MainWindow::requestRates);
+        connect(&ratePollTimer, &QTimer::timeout, this, &MainWindow::sendRequestGpioRates);
         ratePollTimer.start();
     }
 
     // set all tabs
     ui->tabWidget->removeTab(0);
     Status *status = new Status(this);
+    connect(this, &MainWindow::gpioRates, status, &Status::onGpioRatesReceived);
     ui->tabWidget->addTab(status,"status");
+
     Settings *settings = new Settings(this);
     connect(this, &MainWindow::setUiEnabledStates, settings, &Settings::onUiEnabledStateChange);
     ui->tabWidget->addTab(settings,"settings");
+
     Map *map = new Map(this);
     ui->tabWidget->addTab(map, "map");
     connect(this, &MainWindow::geodeticPos, map, &Map::onGeodeticPosReceived);
@@ -94,14 +91,8 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
 	emit closeConnection();
-#if defined(Q_OS_UNIX)
-    saveSettings(QString("/usr/share/muondetector-gui/ipAddresses.save"), addresses);
-#elif defined(Q_OS_WIN)
-    saveSettings(QString("ipAddresses.save"), addresses);
-#else
-    saveSettings(QString("ipAddresses.save"), addresses);
-#endif
-	delete ui;
+    saveSettings(addresses);
+    delete ui;
 }
 
 void MainWindow::makeConnection(QString ipAddress, quint16 port) {
@@ -121,9 +112,16 @@ void MainWindow::makeConnection(QString ipAddress, quint16 port) {
 	tcpThread->start();
 }
 
-bool MainWindow::saveSettings(QString fileName, QStandardItemModel *model) {
-	QFile file(fileName);
-	if (!file.open(QIODevice::WriteOnly)) {
+bool MainWindow::saveSettings(QStandardItemModel *model) {
+#if defined(Q_OS_UNIX)
+    QFile file(QString("~/.muondetector-gui/ipAddresses.save"));
+#elif defined(Q_OS_WIN)
+    QFile file(QString("ipAddresses.save"));
+#else
+    QFile file(QString("ipAddresses.save"));
+#endif
+    if (!file.open(QIODevice::WriteOnly)) {
+        qDebug() << "file open failed in 'WriteOnly' mode";
 		return false;
 	}
 	QDataStream stream(&file);
@@ -136,9 +134,16 @@ bool MainWindow::saveSettings(QString fileName, QStandardItemModel *model) {
 	return true;
 }
 
-bool MainWindow::loadSettings(QString fileName, QStandardItemModel* model) {
-	QFile file(fileName);
+bool MainWindow::loadSettings(QStandardItemModel* model) {
+#if defined(Q_OS_UNIX)
+    QFile file(QString("~/.muondetector-gui/ipAddresses.save"));
+#elif defined(Q_OS_WIN)
+    QFile file(QString("ipAddresses.save"));
+#else
+    QFile file(QString("ipAddresses.save"));
+#endif
 	if (!file.open(QIODevice::ReadOnly)) {
+        qDebug() << "file open failed in 'ReadOnly' mode";
 		return false;
 	}
 	QDataStream stream(&file);
@@ -219,15 +224,18 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
     }
     if (msgID == gpioRateSig){
         quint8 whichRate;
-        float rate;
+        QVector<QPointF> rate;
         *(tcpMessage.dStream) >> whichRate >> rate;
-        emit gpioRate(whichRate, rate);
+        if (rate.empty()){
+            rate.push_back(QPointF(0,0));
+        }
         if (whichRate == 0){
-            ui->rate1->setText(QString::number(rate,'g',3)+"/s");
+            ui->rate1->setText(QString::number(rate.at(0).y(),'g',3)+"/s");
         }
         if (whichRate == 1){
-            ui->rate2->setText(QString::number(rate,'g',3)+"/s");
+            ui->rate2->setText(QString::number(rate.at(0).y(),'g',3)+"/s");
         }
+        emit gpioRates(whichRate, rate);
         updateUiProperties();
         return;
     }
@@ -277,14 +285,25 @@ void MainWindow::sendSetUbxMsgRateChanges(QMap<uint16_t, int> changes){
     emit sendTcpMessage(tcpMessage);
 }
 
-void MainWindow::requestRates(){
+void MainWindow::sendRequestGpioRates(){
     quint8 whichRate = 0;
     TcpMessage xorRateRequest(gpioRateRequestSig);
-    *(xorRateRequest.dStream) << whichRate;
+    *(xorRateRequest.dStream) << whichRate << 5;
     emit sendTcpMessage(xorRateRequest);
     whichRate = 1;
     TcpMessage andRateRequest(gpioRateRequestSig);
-    *(andRateRequest.dStream) << whichRate;
+    *(andRateRequest.dStream) << whichRate << 5;
+    emit sendTcpMessage(andRateRequest);
+}
+
+void MainWindow::sendRequestGpioRateBuffer(){
+    quint8 whichRate = 0;
+    TcpMessage xorRateRequest(gpioRateRequestSig);
+    *(xorRateRequest.dStream) << whichRate << 0;
+    emit sendTcpMessage(xorRateRequest);
+    whichRate = 1;
+    TcpMessage andRateRequest(gpioRateRequestSig);
+    *(andRateRequest.dStream) << whichRate << 0;
     emit sendTcpMessage(andRateRequest);
 }
 
@@ -384,13 +403,14 @@ void MainWindow::updateUiProperties() {
 
 void MainWindow::connected() {
     connectedToDemon = true;
-    saveSettings(QString("ipAddresses.save"), addresses);
+    saveSettings(addresses);
     uiSetConnectedState();
     sendRequest(biasVoltageRequestSig);
     sendRequest(biasRequestSig);
     sendRequest(threshRequestSig);
     sendRequest(pcaChannelRequestSig);
     sendRequestUbxMsgRates();
+    sendRequestGpioRateBuffer();
 }
 
 void MainWindow::on_ipButton_clicked()

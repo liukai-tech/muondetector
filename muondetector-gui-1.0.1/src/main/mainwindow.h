@@ -23,7 +23,7 @@ signals:
 	void addUbxMsgRates(QMap<uint16_t, int> ubxMsgRates);
 	void sendTcpMessage(TcpMessage tcpMessage);
     void closeConnection();
-    void gpioRate(quint8 whichrate, float rate);
+    void gpioRates(quint8 whichrate, QVector<QPointF> rate);
     void tcpDisconnected();
     void setUiEnabledStates(bool enabled);
     void geodeticPos(GeodeticPos pos);
@@ -39,7 +39,8 @@ private slots:
 	// only those properties with value >= 0 will be updated!
 	void resetAndHit();
 	void resetXorHit();
-    void requestRates();
+    void sendRequestGpioRates();
+    void sendRequestGpioRateBuffer();
 	void on_ipButton_clicked();
 	void connected();
 
@@ -82,8 +83,8 @@ private:
 	TcpConnection *tcpConnection = nullptr;
 	QStandardItemModel *addresses;
 	QList<QStandardItem *> *addressColumn;
-	bool saveSettings(QString fileName, QStandardItemModel* model);
-	bool loadSettings(QString fileName, QStandardItemModel* model);
+    bool saveSettings(QStandardItemModel* model);
+    bool loadSettings(QStandardItemModel* model);
 	bool eventFilter(QObject *object, QEvent *event);
 	bool connectedToDemon = false;
 	bool mouseHold = false;
