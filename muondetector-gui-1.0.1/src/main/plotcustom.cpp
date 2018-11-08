@@ -3,22 +3,26 @@
 #include <qwt.h>
 
 PlotCustom::~PlotCustom(){
-    if (xorData!=nullptr) { delete xorData; xorData=nullptr;}
-    if (andData!=nullptr) { delete andData; andData=nullptr;}
     if (xorCurve!=nullptr) { delete xorCurve; xorCurve=nullptr;}
     if (andCurve!=nullptr) { delete andCurve; andCurve=nullptr;}
+    if (grid!=nullptr) { delete grid; grid=nullptr;}
 }
 
 void PlotCustom::initialize(){
-    // Show a title
-       setTitle( "Rate Statistics" );
        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+       setStyleSheet("background-color: white; border: 0px;");
+       setAutoReplot(false);
+       enableAxis(QwtPlot::yLeft,false);
+       enableAxis(QwtPlot::yRight,true);
+       setAxisAutoScale(QwtPlot::xBottom,false);
+       setAxisAutoScale(QwtPlot::yRight,true);
+
        grid = new QwtPlotGrid();
        grid->setPen(Qt::black, 0.1, Qt::SolidLine);
        grid->attach(this);
-       setStyleSheet("background-color: white; border: 0px;");
 
        xorCurve = new QwtPlotCurve();
+       xorCurve->setYAxis(QwtPlot::yRight);
        xorCurve->setRenderHint(QwtPlotCurve::RenderAntialiased, true);
        //xorCurve->setStyle(QwtPlotCurve::Steps);
        QColor xorCurveColor = Qt::darkGreen;
@@ -28,6 +32,7 @@ void PlotCustom::initialize(){
        xorCurve->attach(this);
 
        andCurve = new QwtPlotCurve();
+       andCurve->setYAxis(QwtPlot::yRight);
        andCurve->setRenderHint(QwtPlotCurve::RenderAntialiased, true);
        //xorCurve->setStyle(QwtPlotCurve::Steps);
        QColor andCurveColor = Qt::darkBlue;
@@ -35,29 +40,59 @@ void PlotCustom::initialize(){
        andCurveColor.setAlphaF(0.3);
        andCurve->setBrush(andCurveColor);
        andCurve->attach(this);
-
-       xorData = new QwtPointSeriesData();
-       andData = new QwtPointSeriesData();
        replot();
        show();
 }
 
 void PlotCustom::plotXorSamples(QVector<QPointF>& xorSamples){
-    if (xorData==nullptr || xorCurve == nullptr){
+    if (xorCurve == nullptr){
         return;
     }
-    xorData->setSamples(xorSamples);
-    xorCurve->setData(xorData);
+    QVector<QPointF> samples;
+    for (auto sample : xorSamples){
+        samples.push_back(sample);
+        samples.last().setX(sample.x() - xorSamples.at(xorSamples.size()-1).x());
+    }
+    double xMin = samples.first().x();
+    double xMax = 0;
+    double step = (xMax-xMin)/6;
+    setAxisScale(QwtPlot::xBottom,xMin,xMax,step);
+    QwtPointSeriesData *data = new QwtPointSeriesData(samples);
+    xorCurve->setData(data);
     replot();
-    show();
 }
 
 void PlotCustom::plotAndSamples(QVector<QPointF>& andSamples){
-    if (andData==nullptr || andCurve==nullptr){
+    if (andCurve==nullptr){
         return;
     }
-    andData->setSamples(andSamples);
-    andCurve->setData(andData);
+    QVector<QPointF> samples;
+    for (auto sample : andSamples){
+        samples.push_back(sample);
+        samples.last().setX(sample.x() - andSamples.at(andSamples.size()-1).x());
+    }
+    double xMin = samples.first().x();
+    double xMax = 0;
+    double step = (double)(int)((xMax-xMin)/6);
+    setAxisScale(QwtPlot::xBottom,xMin,xMax,step);
+    QwtPointSeriesData *data = new QwtPointSeriesData(samples);
+    andCurve->setData(data);
     replot();
-    show();
+}
+
+void PlotCustom::setStatusEnabled(bool status){
+    if (xorCurve == nullptr || andCurve == nullptr){
+        return;
+    }
+    if (status==true){
+        xorCurve->attach(this);
+        andCurve->attach(this);
+        setTitle(title);
+        replot();
+    }else{
+        xorCurve->detach();
+        andCurve->detach();
+        setTitle("");
+        replot();
+    }
 }

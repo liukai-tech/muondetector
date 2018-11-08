@@ -28,9 +28,6 @@ MainWindow::MainWindow(QWidget *parent) :
         QIcon icon("muon.ico");
 #endif
 	this->setWindowIcon(icon);
-
-	// initialise all ui elements that will be inactive at start
-	uiSetDisconnectedState();
     setMaxThreshVoltage(1.0);
 
     // setup ipBox and load addresses etc.
@@ -70,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // set all tabs
     ui->tabWidget->removeTab(0);
     Status *status = new Status(this);
+    connect(this, &MainWindow::setUiEnabledStates, status, &Status::onUiEnabledStateChange);
     connect(this, &MainWindow::gpioRates, status, &Status::onGpioRatesReceived);
     ui->tabWidget->addTab(status,"status");
 
@@ -86,6 +84,9 @@ MainWindow::MainWindow(QWidget *parent) :
     //settings->show();
 	// set menu bar actions
     //connect(ui->actionsettings, &QAction::triggered, this, &MainWindow::settings_clicked);
+
+    // initialise all ui elements that will be inactive at start
+    uiSetDisconnectedState();
 }
 
 MainWindow::~MainWindow()
@@ -114,14 +115,14 @@ void MainWindow::makeConnection(QString ipAddress, quint16 port) {
 
 bool MainWindow::saveSettings(QStandardItemModel *model) {
 #if defined(Q_OS_UNIX)
-    QFile file(QString("~/.muondetector-gui/ipAddresses.save"));
+    QFile file(QString("/usr/share/muondetector-gui/ipAddresses.save"));
 #elif defined(Q_OS_WIN)
     QFile file(QString("ipAddresses.save"));
 #else
     QFile file(QString("ipAddresses.save"));
 #endif
-    if (!file.open(QIODevice::WriteOnly)) {
-        qDebug() << "file open failed in 'WriteOnly' mode";
+    if (!file.open(QIODevice::ReadWrite)) {
+        qDebug() << "file open failed in 'ReadWrite' mode at location " << file.fileName();
 		return false;
 	}
 	QDataStream stream(&file);
@@ -136,14 +137,14 @@ bool MainWindow::saveSettings(QStandardItemModel *model) {
 
 bool MainWindow::loadSettings(QStandardItemModel* model) {
 #if defined(Q_OS_UNIX)
-    QFile file(QString("~/.muondetector-gui/ipAddresses.save"));
+    QFile file(QString("/usr/share/muondetector-gui/ipAddresses.save"));
 #elif defined(Q_OS_WIN)
     QFile file(QString("ipAddresses.save"));
 #else
     QFile file(QString("ipAddresses.save"));
 #endif
 	if (!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "file open failed in 'ReadOnly' mode";
+        qDebug() << "file open failed in 'ReadOnly' mode at location " << file.fileName();
 		return false;
 	}
 	QDataStream stream(&file);
@@ -226,14 +227,17 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
         quint8 whichRate;
         QVector<QPointF> rate;
         *(tcpMessage.dStream) >> whichRate >> rate;
-        if (rate.empty()){
-            rate.push_back(QPointF(0,0));
+        float rateYValue;
+        if (!rate.empty()){
+            rateYValue = rate.at(rate.size()-1).y();
+        }else{
+            rateYValue = 0.0;
         }
         if (whichRate == 0){
-            ui->rate1->setText(QString::number(rate.at(0).y(),'g',3)+"/s");
+            ui->rate1->setText(QString::number(rateYValue,'g',3)+"/s");
         }
         if (whichRate == 1){
-            ui->rate2->setText(QString::number(rate.at(0).y(),'g',3)+"/s");
+            ui->rate2->setText(QString::number(rateYValue,'g',3)+"/s");
         }
         emit gpioRates(whichRate, rate);
         updateUiProperties();
@@ -286,24 +290,20 @@ void MainWindow::sendSetUbxMsgRateChanges(QMap<uint16_t, int> changes){
 }
 
 void MainWindow::sendRequestGpioRates(){
-    quint8 whichRate = 0;
     TcpMessage xorRateRequest(gpioRateRequestSig);
-    *(xorRateRequest.dStream) << whichRate << 5;
+    *(xorRateRequest.dStream) << (quint16)5 << (quint8)0;
     emit sendTcpMessage(xorRateRequest);
-    whichRate = 1;
     TcpMessage andRateRequest(gpioRateRequestSig);
-    *(andRateRequest.dStream) << whichRate << 5;
+    *(andRateRequest.dStream) << (quint16)5 << (quint8)1;
     emit sendTcpMessage(andRateRequest);
 }
 
 void MainWindow::sendRequestGpioRateBuffer(){
-    quint8 whichRate = 0;
     TcpMessage xorRateRequest(gpioRateRequestSig);
-    *(xorRateRequest.dStream) << whichRate << 0;
+    *(xorRateRequest.dStream) << (quint16)0 << (quint8)0;
     emit sendTcpMessage(xorRateRequest);
-    whichRate = 1;
     TcpMessage andRateRequest(gpioRateRequestSig);
-    *(andRateRequest.dStream) << whichRate << 0;
+    *(andRateRequest.dStream) << (quint16)0 << (quint8)1;
     emit sendTcpMessage(andRateRequest);
 }
 

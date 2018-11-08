@@ -1,14 +1,14 @@
 [DEBREATE-0.7.13]
 <<CTRL>>
 Package: muondetector-gui
-Version: 1.0.0-raspbian
+Version: 1.0.1-raspbian
 Maintainer: Marvin Peter <marvin.peter@physik.uni-giessen.de>
 Section: net
 Source: muondetector-gui
 Homepage: https://github.com/marvin5300/muondetector
 Architecture: armhf
 Priority: optional
-Depends: libqt5gui5 (>=5), libqt5widgets5 (>=5), libqt5core5a (>=5), libqt5quickwidgets5 (>=5.3), libqt5network5 (>=5), qml-module-qtpositioning (>=5), qml-module-qtlocation (>=5), qml-module-qtquick2 (>=5), libmuondetector-shared (>=1)
+Depends: libqt5gui5 (>=5), libqt5widgets5 (>=5), libqt5core5a (>=5), libqt5quickwidgets5 (>=5.3), libqt5network5 (>=5), qml-module-qtpositioning (>=5), qml-module-qtlocation (>=5), qml-module-qtquick2 (>=5), libmuondetector-shared (>=1), libc6 (>=2), libqwt-qt5-6 (>=6)
 Description: GUI for monitoring and controlling the muondetector-daemon.
  It connects to muondetector-daemon via TCP. It is based on Qt and C++.
  It lets you change the settings for the muondetector hardware and
@@ -19,11 +19,11 @@ Description: GUI for monitoring and controlling the muondetector-daemon.
 <</CTRL>>
 <<FILES>>
 1
-/home/MUONpi217/marvin_temp/muondetector-gui-1.0.0/src/man/man1/muondetector-gui.1.gz -> muondetector-gui.1.gz -> /usr/share/man/man1
-/home/MUONpi217/marvin_temp/muondetector-gui-1.0.0/src/qml/mymap.qml -> mymap.qml -> /usr/share/muondetector-gui/qml
-/home/MUONpi217/marvin_temp/muondetector-gui-1.0.0/src/ipAddresses.save -> ipAddresses.save -> /usr/share/muondetector-gui
-/home/MUONpi217/marvin_temp/muondetector-gui-1.0.0/bin/muondetector-gui* -> muondetector-gui -> /bin
-/home/MUONpi217/marvin_temp/muondetector-gui-1.0.0/src/muon.ico -> muon.ico -> /usr/share/pixmaps
+/home/MUONpi217/marvin_temp/muondetector-gui-1.0.1/bin/muondetector-gui* -> muondetector-gui -> /bin
+/home/MUONpi217/marvin_temp/muondetector-gui-1.0.1/src/man/man1/muondetector-gui.1.gz -> muondetector-gui.1.gz -> /usr/share/man/man1
+/home/MUONpi217/marvin_temp/muondetector-gui-1.0.1/src/qml/mymap.qml -> mymap.qml -> /usr/share/muondetector-gui/qml
+/home/MUONpi217/marvin_temp/muondetector-gui-1.0.1/src/ipAddresses.save -> ipAddresses.save -> /usr/share/muondetector-gui
+/home/MUONpi217/marvin_temp/muondetector-gui-1.0.1/src/icon.rc -> icon.rc -> /usr/share/pixmaps
 <</FILES>>
 <<SCRIPTS>>
 <<PREINST>>
@@ -34,6 +34,7 @@ Description: GUI for monitoring and controlling the muondetector-daemon.
 #! /bin/bash -e
 
 ln -fs "/bin/muondetector-gui" "/usr/bin/muondetector-gui"
+chmod a+w /usr/share/muondetector-gui/ipAddresses.save
 <</POSTINST>>
 <<PRERM>>
 1
