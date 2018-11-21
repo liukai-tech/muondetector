@@ -1,7 +1,0 @@
-E: muondetector-daemon: debian-changelog-file-missing-or-wrong-name
-E: muondetector-daemon: copyright-should-refer-to-common-license-file-for-lgpl
-W: muondetector-daemon: extended-description-line-too-long
-W: muondetector-daemon: extended-description-line-too-long
-W: muondetector-daemon: binary-without-manpage bin/muondetector-daemon
-E: muondetector-daemon: md5sums-lists-nonexistent-file usr/share/doc/muondetector-daemon/changelog.g
-W: muondetector-daemon: file-missing-in-md5sums usr/share/doc/muondetector-daemon/changelog.gz
