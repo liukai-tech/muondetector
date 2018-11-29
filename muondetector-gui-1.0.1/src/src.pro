@@ -47,16 +47,11 @@ INCLUDEPATH += . \
     qml
 
 INCLUDEPATH += ../../muondetector-shared-1.0.0/src
-
-#unix:DEPENDPATH += . /usr/lib/muondetector-shared
-#unix:INCLUDEPATH += /usr/lib/muondetector-shared
+unix:INCLUDEPATH += /usr/include/qwt/ # needed when no autotedetection of qwt
+unix:LIBS += -L/usr/lib -lqwt # include qwt library (somehow no autodetect on some older qt versions)
 unix:LIBS += -L/usr/lib/muondetector-shared -lmuondetector-shared
 win32:LIBS += -L../lib -lmuondetector-shared
 win32:INCLUDEPATH += ../bin/lib
-#win32:DEPENDPATH += ../bin/lib
-unix:INCLUDEPATH += /usr/lib/muondetector-shared
-#unix:DEPENDPATH += /usr/lib/muondetector-shared
-#unix:POST_TARGETDEPS += -L/usr/lib/muondetector-shared -lmuondetector-shared
 
 SOURCES += \
     main/main.cpp \
