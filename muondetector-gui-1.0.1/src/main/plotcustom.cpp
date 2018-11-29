@@ -18,7 +18,8 @@ void PlotCustom::initialize(){
        setAxisAutoScale(QwtPlot::yRight,true);
 
        grid = new QwtPlotGrid();
-       grid->setPen(Qt::black, 0.1, Qt::SolidLine);
+       const QPen blackPen(Qt::black);
+       grid->setPen(blackPen);
        grid->attach(this);
 
        xorCurve = new QwtPlotCurve();
@@ -26,8 +27,9 @@ void PlotCustom::initialize(){
        xorCurve->setRenderHint(QwtPlotCurve::RenderAntialiased, true);
        //xorCurve->setStyle(QwtPlotCurve::Steps);
        QColor xorCurveColor = Qt::darkGreen;
-       xorCurve->setPen(xorCurveColor,1);
        xorCurveColor.setAlphaF(0.3);
+       const QPen greenPen(xorCurveColor);
+       xorCurve->setPen(greenPen);
        xorCurve->setBrush(xorCurveColor);
        xorCurve->attach(this);
 
@@ -36,8 +38,9 @@ void PlotCustom::initialize(){
        andCurve->setRenderHint(QwtPlotCurve::RenderAntialiased, true);
        //xorCurve->setStyle(QwtPlotCurve::Steps);
        QColor andCurveColor = Qt::darkBlue;
-       andCurve->setPen(andCurveColor,1);
        andCurveColor.setAlphaF(0.3);
+       const QPen bluePen(andCurveColor);
+       andCurve->setPen(bluePen);
        andCurve->setBrush(andCurveColor);
        andCurve->attach(this);
        replot();
