@@ -6,7 +6,7 @@
 win32{
 include ( C:/qwt-6.1.3/features/qwt.prf )
 }
-VERSION = 1.0.1
+VERSION = 1.0.2
 QT       += core \
           widgets \
           gui \
@@ -46,7 +46,7 @@ INCLUDEPATH += . \
     main \
     qml
 
-INCLUDEPATH += ../../muondetector-shared-1.0.0/src
+INCLUDEPATH += "$$PWD/../../muondetector-shared-1.0.2/src/"
 
 INCLUDEPATH += /usr/local/qwt-6.1.3/include/
 
