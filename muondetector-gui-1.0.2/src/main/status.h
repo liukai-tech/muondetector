@@ -19,6 +19,7 @@ public:
 
 public slots:
     void onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates);
+    void onAdcSamplesReceived(float adc1, float adc2);
     void onUiEnabledStateChange(bool connected);
 private:
     Ui::Status *statusUi;

@@ -69,6 +69,7 @@ MainWindow::MainWindow(QWidget *parent) :
     Status *status = new Status(this);
     connect(this, &MainWindow::setUiEnabledStates, status, &Status::onUiEnabledStateChange);
     connect(this, &MainWindow::gpioRates, status, &Status::onGpioRatesReceived);
+    connect(this, &MainWindow::adcSamplesReceived, status, &Status::onAdcSamplesReceived);
     ui->tabWidget->addTab(status,"status");
 
     Settings *settings = new Settings(this);
@@ -253,6 +254,16 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
                 >> pos.height >> pos.hMSL >> pos.hAcc >> pos.vAcc;
         emit geodeticPos(pos);
     }
+    if (msgID == adcSampleSig){
+        float adc0, adc1;
+        *(tcpMessage.dStream) >> adc0 >> adc1;
+//        settings->adc0LineEdit->setText(QString::number(adc0,'g',3));
+//        settings->adc1LineEdit->setText(QString::number(adc1,'g',3));
+        emit adcSamplesReceived(adc0,adc1);
+        updateUiProperties();
+        return;
+    }
+
 }
 
 void MainWindow::sendRequest(quint16 requestSig){

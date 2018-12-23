@@ -63,6 +63,13 @@ void Status::onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates){
     }
 }
 
+void Status::onAdcSamplesReceived(float adc1, float adc2)
+{
+        statusUi->ADCLabel1->setText("ADC Ch1: "+QString::number(adc1,'f',3)+" V");
+        statusUi->ADCLabel2->setText("ADC Ch2: "+QString::number(adc2,'f',3)+" V");
+}
+
+
 void Status::onUiEnabledStateChange(bool connected){
     if (connected){
         statusUi->ratePlot->setStatusEnabled(true);

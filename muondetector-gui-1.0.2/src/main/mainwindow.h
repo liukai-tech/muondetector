@@ -7,6 +7,9 @@
 #include <QTime>
 #include <geodeticpos.h>
 
+// for sig handling:
+#include <sys/types.h>
+
 namespace Ui {
 	class MainWindow;
 }
@@ -27,10 +30,12 @@ signals:
     void tcpDisconnected();
     void setUiEnabledStates(bool enabled);
     void geodeticPos(GeodeticPos pos);
+    void adcSamplesReceived(float ch1, float ch2);
 
 public slots:
 	void receivedTcpMessage(TcpMessage tcpMessage);
     void receivedGpioRisingEdge(quint8 pin);
+//    void receivedAdcSamples(float adc0, float adc1);
     void sendRequestUbxMsgRates();
     void sendSetUbxMsgRateChanges(QMap<uint16_t, int> changes);
 	void makeConnection(QString ipAddress, quint16 port);
