@@ -1,5 +1,6 @@
 #include <qwt_legend.h>
 #include <qwt.h>
+#include <qwt_scale_engine.h>
 #include "custom_histogram_widget.h"
 
 CustomHistogram::~CustomHistogram(){
@@ -15,6 +16,7 @@ void CustomHistogram::initialize(){
        enableAxis(QwtPlot::yLeft,true);
        enableAxis(QwtPlot::yRight,false);
        setAxisAutoScale(QwtPlot::xBottom,true);
+//       setAxisScaleEngine(QwtPlot::yLeft, new QwtLogScaleEngine());
        setAxisAutoScale(QwtPlot::yLeft,true);
        //setAxisAutoScale(QwtPlot::yRight,true);
 
@@ -30,28 +32,6 @@ void CustomHistogram::initialize(){
 
 		fBarChart->attach( this );
        
-
-       //xorCurve = new QwtPlotCurve();
-       //xorCurve->setYAxis(QwtPlot::yRight);
-       //xorCurve->setRenderHint(QwtPlotCurve::RenderAntialiased, true);
-       ////xorCurve->setStyle(QwtPlotCurve::Steps);
-       //QColor xorCurveColor = Qt::darkGreen;
-       //xorCurveColor.setAlphaF(0.3);
-       //const QPen greenPen(xorCurveColor);
-       //xorCurve->setPen(greenPen);
-       //xorCurve->setBrush(xorCurveColor);
-       //xorCurve->attach(this);
-
-       //andCurve = new QwtPlotCurve();
-       //andCurve->setYAxis(QwtPlot::yRight);
-       //andCurve->setRenderHint(QwtPlotCurve::RenderAntialiased, true);
-       ////xorCurve->setStyle(QwtPlotCurve::Steps);
-       //QColor andCurveColor = Qt::darkBlue;
-       //andCurveColor.setAlphaF(0.3);
-       //const QPen bluePen(andCurveColor);
-       //andCurve->setPen(bluePen);
-       //andCurve->setBrush(andCurveColor);
-       //andCurve->attach(this);
        replot();
        show();
 }
@@ -60,6 +40,11 @@ void CustomHistogram::initialize(){
 void CustomHistogram::setData(const QVector<QPointF>& samples)
 {
 	fBarChart->setSamples(samples);
+    long int max=0;
+    for (int i=0; i<samples.size(); i++) {
+		if (samples[i].y()>max) max=samples[i].y();
+	}
+    if (fLogY) setAxisScale(QwtPlot::yLeft,0.1, 1.5*max);
 	replot();
 }
 
@@ -75,7 +60,19 @@ void CustomHistogram::setStatusEnabled(bool status){
         replot();
     }else{
         //xorCurve->detach();
-        setTitle("");
+//        setTitle("");
         replot();
     }
+}
+
+void CustomHistogram::setLogY(bool logscale){
+	if (logscale) {
+       setAxisScaleEngine(QwtPlot::yLeft, new QwtLogScaleEngine());
+       setAxisAutoScale(QwtPlot::yLeft,false);
+       fLogY=true;
+	} else {
+       setAxisScaleEngine(QwtPlot::yLeft, new QwtLinearScaleEngine());
+       setAxisAutoScale(QwtPlot::yLeft,true);
+       fLogY=false;
+	}
 }

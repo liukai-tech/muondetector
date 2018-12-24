@@ -17,12 +17,17 @@ public:
     void initialize();
     QwtPlotGrid *grid = nullptr;
     void setStatusEnabled(bool status);
+    void setLogX(bool);
+    void setLogY(bool);
     
     void setData(const QVector<QPointF>&);
 
     QString title = "Histogram";
 protected:
 	QwtPlotBarChart* fBarChart;
+private:
+	bool fLogY=false;
+	bool fLogX=false;
 };
 
 #endif // CUSTOMHISTOGRAM_H

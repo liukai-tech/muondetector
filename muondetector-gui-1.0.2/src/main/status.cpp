@@ -13,6 +13,8 @@ Status::Status(QWidget *parent) :
     statusUi(new Ui::Status)
 {
     statusUi->setupUi(this);
+    statusUi->pulseHeightHistogram->title="Pulse Height";
+    statusUi->pulseHeightHistogram->setLogY(true);
 }
 
 void Status::onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates){
@@ -68,11 +70,10 @@ void Status::onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates){
     }
 }
 
-void Status::onAdcSamplesReceived(float adc1, float adc2)
+void Status::onAdcSampleReceived(float adc)
 {
-        statusUi->ADCLabel1->setText("ADC Ch1: "+QString::number(adc1,'f',3)+" V");
-        statusUi->ADCLabel2->setText("ADC Ch2: "+QString::number(adc2,'f',3)+" V");
-        int binNr = MAX_BINS*adc1/MAX_ADC_VOLTAGE;
+        statusUi->ADCLabel1->setText("ADC Ch1: "+QString::number(adc,'f',3)+" V");
+        int binNr = (MAX_BINS-1)*adc/MAX_ADC_VOLTAGE;
         fPulseHeightHistogramMap[binNr]++;
         updatePulseHeightHistogram();
 }
@@ -92,12 +93,13 @@ void Status::updatePulseHeightHistogram()
 void Status::onUiEnabledStateChange(bool connected){
     if (connected){
         statusUi->ratePlot->setStatusEnabled(true);
-        fPulseHeightHistogramMap.clear();
         statusUi->pulseHeightHistogram->setStatusEnabled(true);
         this->setEnabled(true);
     }else{
         andSamples.clear();
         xorSamples.clear();
+        fPulseHeightHistogramMap.clear();
+        updatePulseHeightHistogram();
         statusUi->ratePlot->setStatusEnabled(false);
         statusUi->pulseHeightHistogram->setStatusEnabled(false);
         this->setDisabled(true);
