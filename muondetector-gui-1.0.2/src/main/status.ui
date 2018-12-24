@@ -15,16 +15,17 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="PlotCustom" name="ratePlot" native="true">
-     <zorder>statusValuesGroupBox</zorder>
-    </widget>
+    <widget class="PlotCustom" name="ratePlot" native="true"/>
    </item>
    <item row="1" column="0">
+    <widget class="CustomHistogram" name="pulseHeightHistogram" native="true"/>
+   </item>
+   <item row="2" column="0">
     <widget class="QGroupBox" name="statusValuesGroupBox">
      <property name="minimumSize">
       <size>
        <width>350</width>
-       <height>200</height>
+       <height>170</height>
       </size>
      </property>
      <property name="title">
@@ -65,6 +66,12 @@
    <class>PlotCustom</class>
    <extends>QWidget</extends>
    <header>plotcustom.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CustomHistogram</class>
+   <extends>QWidget</extends>
+   <header>custom_histogram_widget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

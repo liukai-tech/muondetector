@@ -67,14 +67,15 @@ SOURCES += \
     main/settings.cpp \
     main/status.cpp \
     main/map.cpp \
-    main/plotcustom.cpp
+    main/plotcustom.cpp \
+    main/custom_histogram_widget.cpp
 
 HEADERS += \
     main/mainwindow.h \
     main/settings.h \
     main/status.h \
     main/map.h \
-    main/plotcustom.h
+    main/custom_histogram_widget.h
 
 FORMS += \
     main/mainwindow.ui \
