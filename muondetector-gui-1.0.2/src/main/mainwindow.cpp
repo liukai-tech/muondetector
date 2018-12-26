@@ -70,6 +70,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::setUiEnabledStates, status, &Status::onUiEnabledStateChange);
     connect(this, &MainWindow::gpioRates, status, &Status::onGpioRatesReceived);
     connect(this, &MainWindow::adcSampleReceived, status, &Status::onAdcSampleReceived);
+    connect(this, &MainWindow::dacReadbackReceived, status, &Status::onDacReadbackReceived);
+    connect(status, &Status::inputSwitchChanged, this, &MainWindow::sendInputSwitch);
+    connect(this, &MainWindow::inputSwitchReceived, status, &Status::onInputSwitchReceived);
     ui->tabWidget->addTab(status,"status");
 
     Settings *settings = new Settings(this);
@@ -221,6 +224,8 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
     }
     if (msgID == pcaChannelSig){
         *(tcpMessage.dStream) >> pcaPortMask;
+        //status->setInputSwitchButtonGroup(pcaPortMask);
+        emit inputSwitchReceived(pcaPortMask);
         updateUiProperties();
         return;
     }
@@ -255,9 +260,18 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
         emit geodeticPos(pos);
     }
     if (msgID == adcSampleSig){
-        float adc0;
-        *(tcpMessage.dStream) >> adc0;
-        emit adcSampleReceived(adc0);
+        quint8 channel;
+        float value;
+        *(tcpMessage.dStream) >> channel >> value;
+        emit adcSampleReceived(channel, value);
+        updateUiProperties();
+        return;
+    }
+    if (msgID == dacReadbackSig){
+        quint8 channel;
+        float value;
+        *(tcpMessage.dStream) >> channel >> value;
+        emit dacReadbackReceived(channel, value);
         updateUiProperties();
         return;
     }
@@ -266,6 +280,12 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
 
 void MainWindow::sendRequest(quint16 requestSig){
     TcpMessage tcpMessage(requestSig);
+    emit sendTcpMessage(tcpMessage);
+}
+
+void MainWindow::sendRequest(quint16 requestSig, quint8 par){
+    TcpMessage tcpMessage(requestSig);
+    *(tcpMessage.dStream) << par;
     emit sendTcpMessage(tcpMessage);
 }
 
@@ -278,6 +298,7 @@ void MainWindow::sendSetBiasVoltage(float voltage){
     TcpMessage tcpMessage(biasVoltageSig);
     *(tcpMessage.dStream) << voltage;
     emit sendTcpMessage(tcpMessage);
+    emit sendRequest(dacRequestSig, 2);
 }
 
 void MainWindow::sendSetBiasStatus(bool status){
@@ -290,6 +311,7 @@ void MainWindow::sendSetThresh(uint8_t channel, float value){
     TcpMessage tcpMessage(threshSig);
     *(tcpMessage.dStream) << channel << value;
     emit sendTcpMessage(tcpMessage);
+    emit sendRequest(dacRequestSig, channel);
 }
 
 void MainWindow::sendSetUbxMsgRateChanges(QMap<uint16_t, int> changes){
@@ -417,6 +439,14 @@ void MainWindow::connected() {
     sendRequest(biasVoltageRequestSig);
     sendRequest(biasRequestSig);
     sendRequest(threshRequestSig);
+    sendRequest(dacRequestSig,0);
+    sendRequest(dacRequestSig,1);
+    sendRequest(dacRequestSig,2);
+    sendRequest(dacRequestSig,3);
+    //sendRequest(adcSampleRequestSig,0);
+    sendRequest(adcSampleRequestSig,1);
+    sendRequest(adcSampleRequestSig,2);
+    sendRequest(adcSampleRequestSig,3);
     sendRequest(pcaChannelRequestSig);
     sendRequestUbxMsgRates();
     sendRequestGpioRateBuffer();
@@ -552,4 +582,11 @@ float MainWindow::parseValue(QString text) {
 void MainWindow::on_biasPowerButton_clicked()
 {
     sendSetBiasStatus(!biasON);
+}
+
+void MainWindow::sendInputSwitch(int id) {
+    TcpMessage tcpMessage(pcaChannelSig);
+    *(tcpMessage.dStream) << (quint8)id;
+    emit sendTcpMessage(tcpMessage);
+    sendRequest(pcaChannelRequestSig);
 }

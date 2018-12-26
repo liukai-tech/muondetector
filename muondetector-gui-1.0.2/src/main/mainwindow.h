@@ -30,7 +30,9 @@ signals:
     void tcpDisconnected();
     void setUiEnabledStates(bool enabled);
     void geodeticPos(GeodeticPos pos);
-    void adcSampleReceived(float ch1);
+    void adcSampleReceived(uint8_t channel, float value);
+    void inputSwitchReceived(uint8_t);
+    void dacReadbackReceived(uint8_t channel, float value);
 
 public slots:
 	void receivedTcpMessage(TcpMessage tcpMessage);
@@ -47,6 +49,7 @@ private slots:
     void sendRequestGpioRateBuffer();
 	void on_ipButton_clicked();
 	void connected();
+	void sendInputSwitch(int id);
 
 	void on_discr1Edit_editingFinished();
 
@@ -72,6 +75,7 @@ private:
 	void uiSetDisconnectedState();
 	float parseValue(QString text);
     void sendRequest(quint16 requestSig);
+    void sendRequest(quint16 requestSig, quint8 par);
     void sendSetBiasVoltage(float voltage);
     void sendSetBiasStatus(bool status);
     void sendSetThresh(uint8_t channel, float value);

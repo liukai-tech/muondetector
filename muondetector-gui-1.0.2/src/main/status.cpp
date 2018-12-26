@@ -14,7 +14,19 @@ Status::Status(QWidget *parent) :
 {
     statusUi->setupUi(this);
     statusUi->pulseHeightHistogram->title="Pulse Height";
-    statusUi->pulseHeightHistogram->setLogY(true);
+    statusUi->pulseHeightHistogram->setLogY(false);
+    
+    fInputSwitchButtonGroup = new QButtonGroup(this);
+    fInputSwitchButtonGroup->addButton(statusUi->InputSelectRadioButton0,0);
+    fInputSwitchButtonGroup->addButton(statusUi->InputSelectRadioButton1,1);
+    fInputSwitchButtonGroup->addButton(statusUi->InputSelectRadioButton2,2);
+    fInputSwitchButtonGroup->addButton(statusUi->InputSelectRadioButton3,3);
+    fInputSwitchButtonGroup->addButton(statusUi->InputSelectRadioButton4,4);
+    fInputSwitchButtonGroup->addButton(statusUi->InputSelectRadioButton5,5);
+    fInputSwitchButtonGroup->addButton(statusUi->InputSelectRadioButton6,6);
+    fInputSwitchButtonGroup->addButton(statusUi->InputSelectRadioButton7,7);
+    connect(fInputSwitchButtonGroup, QOverload<int>::of(&QButtonGroup::buttonClicked),
+    [=](int id){ emit inputSwitchChanged(id); });
 }
 
 void Status::onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates){
@@ -70,12 +82,21 @@ void Status::onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates){
     }
 }
 
-void Status::onAdcSampleReceived(float adc)
+void Status::onAdcSampleReceived(uint8_t channel, float value)
 {
-        statusUi->ADCLabel1->setText("ADC Ch1: "+QString::number(adc,'f',3)+" V");
-        int binNr = (MAX_BINS-1)*adc/MAX_ADC_VOLTAGE;
+	if (channel==0) {
+		statusUi->ADCLabel1->setText("Ch1: "+QString::number(value,'f',3)+" V");
+        int binNr = (MAX_BINS-1)*value/MAX_ADC_VOLTAGE;
         fPulseHeightHistogramMap[binNr]++;
         updatePulseHeightHistogram();
+
+	} else if (channel==1)
+		statusUi->ADCLabel2->setText("Ch2: "+QString::number(value,'f',3)+" V");
+	else if (channel==2)
+		statusUi->ADCLabel3->setText("Ch3: "+QString::number(value,'f',3)+" V");
+	else if (channel==3)
+		statusUi->ADCLabel4->setText("Ch4: "+QString::number(value,'f',3)+" V");
+
 }
 
 void Status::updatePulseHeightHistogram()
@@ -106,7 +127,31 @@ void Status::onUiEnabledStateChange(bool connected){
     }
 }
 
+void Status::on_histoLogYCheckBox_clicked()
+{
+    statusUi->pulseHeightHistogram->setLogY(statusUi->histoLogYCheckBox->isChecked());
+}
+
+void Status::onInputSwitchReceived(uint8_t id)
+{
+	fInputSwitchButtonGroup->button(id)->setChecked(true);
+}
+
+void Status::onDacReadbackReceived(uint8_t channel, float value)
+{
+	if (channel==0)
+		statusUi->DACLabel1->setText("Ch1: "+QString::number(value,'f',3)+" V");
+	else if (channel==1)
+		statusUi->DACLabel2->setText("Ch2: "+QString::number(value,'f',3)+" V");
+	else if (channel==2)
+		statusUi->DACLabel3->setText("Ch3: "+QString::number(value,'f',3)+" V");
+	else if (channel==3)
+		statusUi->DACLabel4->setText("Ch4: "+QString::number(value,'f',3)+" V");
+	
+}
+
 Status::~Status()
 {
     delete statusUi;
+    delete fInputSwitchButtonGroup;
 }
