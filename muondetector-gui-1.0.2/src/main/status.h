@@ -21,6 +21,10 @@ public:
 
 signals:
 	void inputSwitchChanged(int id);
+	void biasSwitchChanged(bool state);
+	void gainSwitchChanged(bool state);
+	void preamp1SwitchChanged(bool state);
+	void preamp2SwitchChanged(bool state);
 public slots:
     void onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates);
     void onAdcSampleReceived(uint8_t channel, float value);
@@ -28,7 +32,11 @@ public slots:
     void updatePulseHeightHistogram();
    	void on_histoLogYCheckBox_clicked();
    	void onInputSwitchReceived(uint8_t id);
+   	void onBiasSwitchReceived(bool state);
+   	void onGainSwitchReceived(bool state);
+   	void onPreampSwitchReceived(uint8_t channel, bool state);
    	void onDacReadbackReceived(uint8_t channel, float value);
+   	void clearPulseHeightHisto();
 
 private:
     Ui::Status *statusUi;

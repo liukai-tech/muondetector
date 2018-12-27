@@ -33,6 +33,9 @@ signals:
     void adcSampleReceived(uint8_t channel, float value);
     void inputSwitchReceived(uint8_t);
     void dacReadbackReceived(uint8_t channel, float value);
+    void biasSwitchReceived(bool state);
+    void preampSwitchReceived(uint8_t channel, bool state);
+    void gainSwitchReceived(bool state);
 
 public slots:
 	void receivedTcpMessage(TcpMessage tcpMessage);
@@ -80,6 +83,10 @@ private:
     void sendSetBiasStatus(bool status);
     void sendSetThresh(uint8_t channel, float value);
     void setMaxThreshVoltage(float voltage);
+    void sendPreamp1Switch(bool status);
+    void sendPreamp2Switch(bool status);
+    void sendGainSwitch(bool status);
+
     void updateUiProperties();
     int verbose = 0;
     float biasVoltage = 0;

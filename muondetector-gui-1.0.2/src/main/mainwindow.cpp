@@ -73,6 +73,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::dacReadbackReceived, status, &Status::onDacReadbackReceived);
     connect(status, &Status::inputSwitchChanged, this, &MainWindow::sendInputSwitch);
     connect(this, &MainWindow::inputSwitchReceived, status, &Status::onInputSwitchReceived);
+    connect(this, &MainWindow::biasSwitchReceived, status, &Status::onBiasSwitchReceived);
+    connect(status, &Status::biasSwitchChanged, this, &MainWindow::sendSetBiasStatus);
+    connect(this, &MainWindow::preampSwitchReceived, status, &Status::onPreampSwitchReceived);
+    connect(status, &Status::preamp1SwitchChanged, this, &MainWindow::sendPreamp1Switch);
+    connect(status, &Status::preamp2SwitchChanged, this, &MainWindow::sendPreamp2Switch);
+    connect(this, &MainWindow::gainSwitchReceived, status, &Status::onGainSwitchReceived);
+    connect(status, &Status::gainSwitchChanged, this, &MainWindow::sendGainSwitch);
+    
     ui->tabWidget->addTab(status,"status");
 
     Settings *settings = new Settings(this);
@@ -219,6 +227,22 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
     }
     if (msgID == biasSig){
         *(tcpMessage.dStream) >> biasON;
+        emit biasSwitchReceived(biasON);
+        updateUiProperties();
+        return;
+    }
+    if (msgID == preampSig){
+        quint8 channel;
+        bool state;
+        *(tcpMessage.dStream) >> channel >> state;
+        emit preampSwitchReceived(channel, state);
+        updateUiProperties();
+        return;
+    }
+    if (msgID == gainSwitchSig){
+        bool gainSwitch;
+        *(tcpMessage.dStream) >> gainSwitch;
+        emit gainSwitchReceived(gainSwitch);
         updateUiProperties();
         return;
     }
@@ -304,6 +328,24 @@ void MainWindow::sendSetBiasVoltage(float voltage){
 void MainWindow::sendSetBiasStatus(bool status){
     TcpMessage tcpMessage(biasSig);
     *(tcpMessage.dStream) << status;
+    emit sendTcpMessage(tcpMessage);
+}
+
+void MainWindow::sendGainSwitch(bool status){
+    TcpMessage tcpMessage(gainSwitchSig);
+    *(tcpMessage.dStream) << status;
+    emit sendTcpMessage(tcpMessage);
+}
+
+void MainWindow::sendPreamp1Switch(bool status){
+    TcpMessage tcpMessage(preampSig);
+    *(tcpMessage.dStream) << (quint8)0 << status;
+    emit sendTcpMessage(tcpMessage);
+}
+
+void MainWindow::sendPreamp2Switch(bool status){
+    TcpMessage tcpMessage(preampSig);
+    *(tcpMessage.dStream) << (quint8)1 << status;
     emit sendTcpMessage(tcpMessage);
 }
 
@@ -438,6 +480,8 @@ void MainWindow::connected() {
     uiSetConnectedState();
     sendRequest(biasVoltageRequestSig);
     sendRequest(biasRequestSig);
+    sendRequest(preampRequestSig,0);
+    sendRequest(preampRequestSig,1);
     sendRequest(threshRequestSig);
     sendRequest(dacRequestSig,0);
     sendRequest(dacRequestSig,1);

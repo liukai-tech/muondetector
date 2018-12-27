@@ -5,8 +5,8 @@
 
 
 static const int rateSecondsBuffered = 60*120; // 120 min
-static const int MAX_BINS = 100; // bins in pulse height histogram
-static const float MAX_ADC_VOLTAGE = 2.048;
+static const int MAX_BINS = 200; // bins in pulse height histogram
+static const float MAX_ADC_VOLTAGE = 4.0;
 
 Status::Status(QWidget *parent) :
     QWidget(parent),
@@ -15,6 +15,11 @@ Status::Status(QWidget *parent) :
     statusUi->setupUi(this);
     statusUi->pulseHeightHistogram->title="Pulse Height";
     statusUi->pulseHeightHistogram->setLogY(false);
+    connect(statusUi->resetHistoPushButton, &QPushButton::clicked, this, &Status::clearPulseHeightHisto);
+    connect(statusUi->biasEnableCheckBox, &QCheckBox::clicked, this, &Status::biasSwitchChanged);
+    connect(statusUi->highGainCheckBox, &QCheckBox::clicked, this, &Status::gainSwitchChanged);
+    connect(statusUi->preamp1CheckBox, &QCheckBox::clicked, this, &Status::preamp1SwitchChanged);
+    connect(statusUi->preamp2CheckBox, &QCheckBox::clicked, this, &Status::preamp2SwitchChanged);
     
     fInputSwitchButtonGroup = new QButtonGroup(this);
     fInputSwitchButtonGroup->addButton(statusUi->InputSelectRadioButton0,0);
@@ -27,6 +32,8 @@ Status::Status(QWidget *parent) :
     fInputSwitchButtonGroup->addButton(statusUi->InputSelectRadioButton7,7);
     connect(fInputSwitchButtonGroup, QOverload<int>::of(&QButtonGroup::buttonClicked),
     [=](int id){ emit inputSwitchChanged(id); });
+    
+    
 }
 
 void Status::onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates){
@@ -82,6 +89,12 @@ void Status::onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates){
     }
 }
 
+void Status::clearPulseHeightHisto()
+{
+	fPulseHeightHistogramMap.clear();
+	updatePulseHeightHistogram();
+}
+
 void Status::onAdcSampleReceived(uint8_t channel, float value)
 {
 	if (channel==0) {
@@ -135,6 +148,24 @@ void Status::on_histoLogYCheckBox_clicked()
 void Status::onInputSwitchReceived(uint8_t id)
 {
 	fInputSwitchButtonGroup->button(id)->setChecked(true);
+}
+
+void Status::onBiasSwitchReceived(bool state)
+{
+	statusUi->biasEnableCheckBox->setChecked(state);
+}
+
+void Status::onGainSwitchReceived(bool state)
+{
+	statusUi->highGainCheckBox->setChecked(state);
+}
+
+void Status::onPreampSwitchReceived(uint8_t channel, bool state)
+{
+	if (channel==0)
+		statusUi->preamp1CheckBox->setChecked(state);
+	else if (channel==1)
+		statusUi->preamp2CheckBox->setChecked(state);
 }
 
 void Status::onDacReadbackReceived(uint8_t channel, float value)
