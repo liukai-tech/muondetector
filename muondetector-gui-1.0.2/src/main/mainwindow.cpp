@@ -61,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ratePollTimer.setInterval(3000);
         ratePollTimer.setSingleShot(false);
         connect(&ratePollTimer, &QTimer::timeout, this, &MainWindow::sendRequestGpioRates);
+        connect(&ratePollTimer, &QTimer::timeout, this, &MainWindow::sendValueUpdateRequests);
         ratePollTimer.start();
     }
 
@@ -80,6 +81,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(status, &Status::preamp2SwitchChanged, this, &MainWindow::sendPreamp2Switch);
     connect(this, &MainWindow::gainSwitchReceived, status, &Status::onGainSwitchReceived);
     connect(status, &Status::gainSwitchChanged, this, &MainWindow::sendGainSwitch);
+    connect(this, &MainWindow::temperatureReceived, status, &Status::onTemperatureReceived);
     
     ui->tabWidget->addTab(status,"status");
 
@@ -299,7 +301,13 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
         updateUiProperties();
         return;
     }
-
+    if (msgID == temperatureSig){
+        float value;
+        *(tcpMessage.dStream) >> value;
+        emit temperatureReceived(value);
+        updateUiProperties();
+        return;
+    }
 }
 
 void MainWindow::sendRequest(quint16 requestSig){
@@ -494,6 +502,28 @@ void MainWindow::connected() {
     sendRequest(pcaChannelRequestSig);
     sendRequestUbxMsgRates();
     sendRequestGpioRateBuffer();
+    sendRequest(temperatureRequestSig);
+}
+
+
+void MainWindow::sendValueUpdateRequests() {
+    sendRequest(biasVoltageRequestSig);
+//    sendRequest(biasRequestSig);
+//    sendRequest(preampRequestSig,0);
+//    sendRequest(preampRequestSig,1);
+//    sendRequest(threshRequestSig);
+    sendRequest(dacRequestSig,0);
+    sendRequest(dacRequestSig,1);
+    sendRequest(dacRequestSig,2);
+    sendRequest(dacRequestSig,3);
+    //sendRequest(adcSampleRequestSig,0);
+    sendRequest(adcSampleRequestSig,1);
+    sendRequest(adcSampleRequestSig,2);
+    sendRequest(adcSampleRequestSig,3);
+//    sendRequest(pcaChannelRequestSig);
+//    sendRequestUbxMsgRates();
+//    sendRequestGpioRateBuffer();
+    sendRequest(temperatureRequestSig);
 }
 
 void MainWindow::on_ipButton_clicked()

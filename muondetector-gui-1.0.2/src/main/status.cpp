@@ -181,6 +181,11 @@ void Status::onDacReadbackReceived(uint8_t channel, float value)
 	
 }
 
+void Status::onTemperatureReceived(float value)
+{
+	statusUi->temperatureLabel->setText("Temperature: "+QString::number(value,'f',2)+" °C");
+}
+
 Status::~Status()
 {
     delete statusUi;

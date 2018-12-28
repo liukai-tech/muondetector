@@ -36,6 +36,7 @@ signals:
     void biasSwitchReceived(bool state);
     void preampSwitchReceived(uint8_t channel, bool state);
     void gainSwitchReceived(bool state);
+    void temperatureReceived(float temp);
 
 public slots:
 	void receivedTcpMessage(TcpMessage tcpMessage);
@@ -50,6 +51,8 @@ private slots:
 	void resetXorHit();
     void sendRequestGpioRates();
     void sendRequestGpioRateBuffer();
+	void sendValueUpdateRequests();
+
 	void on_ipButton_clicked();
 	void connected();
 	void sendInputSwitch(int id);

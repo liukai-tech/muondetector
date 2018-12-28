@@ -36,6 +36,7 @@ public slots:
    	void onGainSwitchReceived(bool state);
    	void onPreampSwitchReceived(uint8_t channel, bool state);
    	void onDacReadbackReceived(uint8_t channel, float value);
+    void onTemperatureReceived(float value);
    	void clearPulseHeightHisto();
 
 private:
