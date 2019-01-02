@@ -47,17 +47,25 @@ INCLUDEPATH += . \
     qml
 
 INCLUDEPATH += "$$PWD/../../muondetector-shared-1.0.2/src/"
-
 INCLUDEPATH += /usr/local/qwt-6.1.3/include/
+INCLUDEPATH += /usr/include/qwt/
 
-unix:INCLUDEPATH += /usr/lib/muondetector-shared
-unix:LIBS += -L/usr/lib -lqwt-qt5
+#unix:INCLUDEPATH += /usr/lib/muondetector-shared
+unix:LIBS += -L/usr/local/qwt-6.1.3/lib -lqwt
+#unix:LIBS += -L/usr/lib -lqwt-qt5
+#unix:LIBS += -L/usr/lib -lqwt
 else:unix:LIBS += -L/usr/local/qwt-6.1.3/lib -lqwt
 else:unix:LIBS += -L/usr/lib/muondetector-gui -lqwt
 else:unix:LIBS += "$$PWD/../lib/libqwt.so.6.1.3"
 else:unix:LIBS += -L/usr/lib/ -lqwt
+
+#unix {
+#	LIBS += "-L$$PWD/../../muondetector-shared-1.0.2/bin" -lmuondetector-shared
+#}
 unix:LIBS += -L/usr/lib/muondetector-shared -lmuondetector-shared
-else:LIBS += -L./ -lmuondetector-shared
+#else:LIBS += "-L$$PWD/../../muondetector-shared-1.0.2/bin/"
+#else:LIBS += -L../ -lmuondetector-shared
+
 win32:LIBS += -L../lib -lmuondetector-shared
 win32:INCLUDEPATH += ../bin/lib
 

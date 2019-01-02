@@ -10,6 +10,9 @@
 #include <status.h>
 #include <tcpmessage_keys.h>
 #include <map.h>
+#include <iostream>
+
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),

@@ -43,7 +43,6 @@ private:
     Ui::Status *statusUi;
     QVector<QPointF> xorSamples;
     QVector<QPointF> andSamples;
-    QMap<int, int> fPulseHeightHistogramMap;
     QButtonGroup* fInputSwitchButtonGroup;
 };
 

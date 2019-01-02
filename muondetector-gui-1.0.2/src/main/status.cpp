@@ -1,7 +1,7 @@
+#include <QtGlobal>
 #include <status.h>
 #include <ui_status.h>
 #include <plotcustom.h>
-
 
 
 static const int rateSecondsBuffered = 60*120; // 120 min
@@ -14,7 +14,12 @@ Status::Status(QWidget *parent) :
 {
     statusUi->setupUi(this);
     statusUi->pulseHeightHistogram->title="Pulse Height";
-    statusUi->pulseHeightHistogram->setLogY(false);
+	
+	statusUi->pulseHeightHistogram->setXMin(0.0);
+	statusUi->pulseHeightHistogram->setXMax(MAX_ADC_VOLTAGE);
+	statusUi->pulseHeightHistogram->setNrBins(MAX_BINS);
+	statusUi->pulseHeightHistogram->setLogY(false);
+
     connect(statusUi->resetHistoPushButton, &QPushButton::clicked, this, &Status::clearPulseHeightHisto);
     connect(statusUi->biasEnableCheckBox, &QCheckBox::clicked, this, &Status::biasSwitchChanged);
     connect(statusUi->highGainCheckBox, &QCheckBox::clicked, this, &Status::gainSwitchChanged);
@@ -30,10 +35,8 @@ Status::Status(QWidget *parent) :
     fInputSwitchButtonGroup->addButton(statusUi->InputSelectRadioButton5,5);
     fInputSwitchButtonGroup->addButton(statusUi->InputSelectRadioButton6,6);
     fInputSwitchButtonGroup->addButton(statusUi->InputSelectRadioButton7,7);
-    connect(fInputSwitchButtonGroup, QOverload<int>::of(&QButtonGroup::buttonClicked),
-    [=](int id){ emit inputSwitchChanged(id); });
-    
-    
+    connect(fInputSwitchButtonGroup, static_cast<void (QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked), [=](int id){ emit inputSwitchChanged(id); });
+//    connect(fInputSwitchButtonGroup, QOverload<int>::of(&QButtonGroup::buttonClicked), [=](int id){ emit inputSwitchChanged(id); });
 }
 
 void Status::onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates){
@@ -91,7 +94,8 @@ void Status::onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates){
 
 void Status::clearPulseHeightHisto()
 {
-	fPulseHeightHistogramMap.clear();
+	statusUi->pulseHeightHistogram->clear();
+	//fPulseHeightHistogramMap.clear();
 	updatePulseHeightHistogram();
 }
 
@@ -99,9 +103,9 @@ void Status::onAdcSampleReceived(uint8_t channel, float value)
 {
 	if (channel==0) {
 		statusUi->ADCLabel1->setText("Ch1: "+QString::number(value,'f',3)+" V");
-        int binNr = (MAX_BINS-1)*value/MAX_ADC_VOLTAGE;
-        fPulseHeightHistogramMap[binNr]++;
-        updatePulseHeightHistogram();
+//        int binNr = (MAX_BINS-1)*value/MAX_ADC_VOLTAGE;
+		statusUi->pulseHeightHistogram->fill(value);
+		updatePulseHeightHistogram();
 
 	} else if (channel==1)
 		statusUi->ADCLabel2->setText("Ch2: "+QString::number(value,'f',3)+" V");
@@ -114,14 +118,10 @@ void Status::onAdcSampleReceived(uint8_t channel, float value)
 
 void Status::updatePulseHeightHistogram()
 {
-	QVector< QPointF > series;
-	for (int i=0; i<MAX_BINS; i++) {
-		QPointF point;
-		point.rx() = MAX_ADC_VOLTAGE*i/MAX_BINS;
-		point.ry() = fPulseHeightHistogramMap[i];
-		series.push_back(point);
-	}
-	statusUi->pulseHeightHistogram->setData( series );
+//	statusUi->pulseHeightHistogram->replot();
+	statusUi->pulseHeightHistogram->update();
+	long int entries = statusUi->pulseHeightHistogram->getEntries();
+	statusUi->PulseHeightHistogramEntriesLabel->setText(QString::number(entries)+" entries");
 }
 
 void Status::onUiEnabledStateChange(bool connected){
@@ -132,10 +132,10 @@ void Status::onUiEnabledStateChange(bool connected){
     }else{
         andSamples.clear();
         xorSamples.clear();
-        fPulseHeightHistogramMap.clear();
-        updatePulseHeightHistogram();
+//		updatePulseHeightHistogram();
         statusUi->ratePlot->setStatusEnabled(false);
-        statusUi->pulseHeightHistogram->setStatusEnabled(false);
+		statusUi->pulseHeightHistogram->clear();        
+		statusUi->pulseHeightHistogram->setStatusEnabled(false);
         this->setDisabled(true);
     }
 }
@@ -191,3 +191,4 @@ Status::~Status()
     delete statusUi;
     delete fInputSwitchButtonGroup;
 }
+

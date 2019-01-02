@@ -48,9 +48,11 @@ void PlotCustom::initialize(){
 }
 
 void PlotCustom::plotXorSamples(QVector<QPointF>& xorSamples){
-    if (xorCurve == nullptr){
-        return;
-    }
+    
+	if (!isEnabled()) return;
+	if (xorCurve == nullptr){
+		return;
+	}
     QVector<QPointF> samples;
     for (auto sample : xorSamples){
         samples.push_back(sample);
@@ -66,6 +68,7 @@ void PlotCustom::plotXorSamples(QVector<QPointF>& xorSamples){
 }
 
 void PlotCustom::plotAndSamples(QVector<QPointF>& andSamples){
+	if (!isEnabled()) return;
     if (andCurve==nullptr){
         return;
     }
@@ -99,3 +102,4 @@ void PlotCustom::setStatusEnabled(bool status){
         replot();
     }
 }
+
