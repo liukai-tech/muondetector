@@ -5,10 +5,13 @@
 #include <QStandardItemModel>
 #include <QErrorMessage>
 #include <QTime>
+#include <QVector>
 #include <geodeticpos.h>
 
 // for sig handling:
 #include <sys/types.h>
+
+struct I2cDeviceEntry;
 
 namespace Ui {
 	class MainWindow;
@@ -37,6 +40,7 @@ signals:
     void preampSwitchReceived(uint8_t channel, bool state);
     void gainSwitchReceived(bool state);
     void temperatureReceived(float temp);
+	void i2cStatsReceived(quint32 bytesRead, quint32 bytesWritten, const QVector<I2cDeviceEntry>& deviceList);
 
 public slots:
 	void receivedTcpMessage(TcpMessage tcpMessage);

@@ -10,6 +10,7 @@
 #include <status.h>
 #include <tcpmessage_keys.h>
 #include <map.h>
+#include <i2cform.h>
 #include <iostream>
 
 using namespace std;
@@ -20,6 +21,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     qRegisterMetaType<TcpMessage>("TcpMessage");
     qRegisterMetaType<GeodeticPos>("GeodeticPos");
+    qRegisterMetaType<bool>("bool");
+    qRegisterMetaType<I2cDeviceEntry>("I2cDeviceEntry");
+
     ui->setupUi(this);
 	ui->discr1Layout->setAlignment(ui->discr1Slider, Qt::AlignHCenter);
     ui->discr2Layout->setAlignment(ui->discr2Slider, Qt::AlignHCenter); // aligns the slider in their vertical layout centered
@@ -98,6 +102,16 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::addUbxMsgRates, settings, &Settings::addUbxMsgRates);
     connect(settings, &Settings::sendRequestUbxMsgRates, this, &MainWindow::sendRequestUbxMsgRates);
     connect(settings, &Settings::sendSetUbxMsgRateChanges, this, &MainWindow::sendSetUbxMsgRateChanges);
+
+
+
+    I2cForm *i2cTab = new I2cForm(this);
+//    connect(this, &MainWindow::setUiEnabledStates, settings, &Settings::onUiEnabledStateChange);
+    connect(this, &MainWindow::i2cStatsReceived, i2cTab, &I2cForm::onI2cStatsReceived);
+    ui->tabWidget->addTab(i2cTab,"I2C bus");
+
+
+
     //settings->show();
 	// set menu bar actions
     //connect(ui->actionsettings, &QAction::triggered, this, &MainWindow::settings_clicked);
@@ -311,6 +325,29 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
         updateUiProperties();
         return;
     }
+    if (msgID == i2cStatsSig){
+		quint8 nrDevices=0;
+		quint32 bytesRead = 0;
+		quint32 bytesWritten = 0;
+    	*(tcpMessage.dStream) >> nrDevices >> bytesRead >> bytesWritten;
+
+		QVector<I2cDeviceEntry> deviceList;
+		for (uint8_t i=0; i<nrDevices; i++)
+		{
+			uint8_t addr = 0;
+			QString title = "none";
+			bool present = false;
+			*(tcpMessage.dStream) >> addr >> title >> present;
+			I2cDeviceEntry entry;
+			entry.address=addr;
+			entry.name = title;
+			entry.online=present;
+			deviceList.push_back(entry);
+		}
+        emit i2cStatsReceived(bytesRead, bytesWritten, deviceList);
+        //updateUiProperties();
+        return;
+    }
 }
 
 void MainWindow::sendRequest(quint16 requestSig){
@@ -506,6 +543,7 @@ void MainWindow::connected() {
     sendRequestUbxMsgRates();
     sendRequestGpioRateBuffer();
     sendRequest(temperatureRequestSig);
+    sendRequest(i2cStatsRequestSig);
 }
 
 
@@ -527,6 +565,7 @@ void MainWindow::sendValueUpdateRequests() {
 //    sendRequestUbxMsgRates();
 //    sendRequestGpioRateBuffer();
     sendRequest(temperatureRequestSig);
+    sendRequest(i2cStatsRequestSig);
 }
 
 void MainWindow::on_ipButton_clicked()
