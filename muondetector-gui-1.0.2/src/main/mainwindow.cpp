@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QErrorMessage>
 #include <gpio_pin_definitions.h>
+#include <calib_struct.h>
 #include <settings.h>
 #include <status.h>
 #include <tcpmessage_keys.h>
@@ -15,6 +16,21 @@
 
 using namespace std;
 
+QDataStream & operator >> (QDataStream& in, CalibStruct& calib)
+{
+	QString s1,s2,s3;
+	quint16 u;
+	in >> s1 >> s2;
+	in >> u;
+	in >> s3;
+	calib.name = s1.toStdString();
+	calib.type = s2.toStdString();
+	calib.address = (uint16_t)u;
+	calib.value = s3.toStdString();
+	return in;
+}
+
+
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
@@ -23,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qRegisterMetaType<GeodeticPos>("GeodeticPos");
     qRegisterMetaType<bool>("bool");
     qRegisterMetaType<I2cDeviceEntry>("I2cDeviceEntry");
+    qRegisterMetaType<I2cDeviceEntry>("CalibStruct");
 
     ui->setupUi(this);
 	ui->discr1Layout->setAlignment(ui->discr1Slider, Qt::AlignHCenter);
@@ -348,6 +365,24 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
         //updateUiProperties();
         return;
     }
+    if (msgID == calibSetSig){
+		quint16 nrPars=0;
+		bool valid = false;
+		bool eepromValid = 0;
+    	*(tcpMessage.dStream) >> valid >> eepromValid >> nrPars;
+
+		QVector<CalibStruct> calibList;
+		for (uint8_t i=0; i<nrPars; i++)
+		{
+			CalibStruct item;
+			*(tcpMessage.dStream) >> item;
+			calibList.push_back(item);
+		}
+        emit calibReceived(valid, eepromValid, calibList);
+        //updateUiProperties();
+        return;
+    }
+
 }
 
 void MainWindow::sendRequest(quint16 requestSig){
@@ -566,6 +601,7 @@ void MainWindow::sendValueUpdateRequests() {
 //    sendRequestGpioRateBuffer();
     sendRequest(temperatureRequestSig);
     sendRequest(i2cStatsRequestSig);
+    sendRequest(calibRequestSig);
 }
 
 void MainWindow::on_ipButton_clicked()
