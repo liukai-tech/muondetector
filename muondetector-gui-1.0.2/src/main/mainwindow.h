@@ -43,6 +43,7 @@ signals:
     void temperatureReceived(float temp);
 	void i2cStatsReceived(quint32 bytesRead, quint32 bytesWritten, const QVector<I2cDeviceEntry>& deviceList);
 	void calibReceived(bool valid, bool eepromValid, const QVector<CalibStruct>& calibList);
+	
 public slots:
 	void receivedTcpMessage(TcpMessage tcpMessage);
     void receivedGpioRisingEdge(quint8 pin);

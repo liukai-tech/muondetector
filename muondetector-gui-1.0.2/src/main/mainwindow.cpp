@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qRegisterMetaType<GeodeticPos>("GeodeticPos");
     qRegisterMetaType<bool>("bool");
     qRegisterMetaType<I2cDeviceEntry>("I2cDeviceEntry");
-    qRegisterMetaType<I2cDeviceEntry>("CalibStruct");
+    qRegisterMetaType<CalibStruct>("CalibStruct");
 
     ui->setupUi(this);
 	ui->discr1Layout->setAlignment(ui->discr1Slider, Qt::AlignHCenter);
