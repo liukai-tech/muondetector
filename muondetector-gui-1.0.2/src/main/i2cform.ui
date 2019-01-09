@@ -83,6 +83,13 @@
      </property>
     </widget>
    </item>
+   <item row="3" column="0">
+    <widget class="QPushButton" name="scanBusPushButton">
+     <property name="text">
+      <string>Scan Bus for extra devices</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>

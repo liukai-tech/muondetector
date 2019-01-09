@@ -12,6 +12,7 @@
 #include <tcpmessage_keys.h>
 #include <map.h>
 #include <i2cform.h>
+#include <calibform.h>
 #include <iostream>
 
 using namespace std;
@@ -125,9 +126,21 @@ MainWindow::MainWindow(QWidget *parent) :
     I2cForm *i2cTab = new I2cForm(this);
 //    connect(this, &MainWindow::setUiEnabledStates, settings, &Settings::onUiEnabledStateChange);
     connect(this, &MainWindow::i2cStatsReceived, i2cTab, &I2cForm::onI2cStatsReceived);
+    connect(i2cTab, &I2cForm::i2cStatsRequest, this, [this]() { this->sendRequest(i2cStatsRequestSig); } );
+    connect(i2cTab, &I2cForm::scanI2cBusRequest, this, [this]() { this->sendRequest(i2cScanBusRequestSig); } );
+
     ui->tabWidget->addTab(i2cTab,"I2C bus");
 
+    CalibForm *calibTab = new CalibForm(this);
+//    connect(this, &MainWindow::setUiEnabledStates, settings, &Settings::onUiEnabledStateChange);
+    connect(this, &MainWindow::calibReceived, calibTab, &CalibForm::onCalibReceived);
+    connect(calibTab, &CalibForm::calibRequest, this, [this]() { this->sendRequest(calibRequestSig); } );
+    connect(calibTab, &CalibForm::writeCalibToEeprom, this, [this]() { this->sendRequest(calibWriteEepromSig); } );
+    connect(this, &MainWindow::adcSampleReceived, calibTab, &CalibForm::onAdcSampleReceived);
+    
+	ui->tabWidget->addTab(calibTab,"Calibration");
 
+	//sendRequest(calibRequestSig);
 
     //settings->show();
 	// set menu bar actions
@@ -367,9 +380,10 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
     }
     if (msgID == calibSetSig){
 		quint16 nrPars=0;
+		quint64 id = 0;
 		bool valid = false;
 		bool eepromValid = 0;
-    	*(tcpMessage.dStream) >> valid >> eepromValid >> nrPars;
+    	*(tcpMessage.dStream) >> valid >> eepromValid >> id >> nrPars;
 
 		QVector<CalibStruct> calibList;
 		for (uint8_t i=0; i<nrPars; i++)
@@ -378,7 +392,7 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
 			*(tcpMessage.dStream) >> item;
 			calibList.push_back(item);
 		}
-        emit calibReceived(valid, eepromValid, calibList);
+        emit calibReceived(valid, eepromValid, id, calibList);
         //updateUiProperties();
         return;
     }
@@ -579,6 +593,7 @@ void MainWindow::connected() {
     sendRequestGpioRateBuffer();
     sendRequest(temperatureRequestSig);
     sendRequest(i2cStatsRequestSig);
+    sendRequest(calibRequestSig);
 }
 
 
@@ -601,7 +616,7 @@ void MainWindow::sendValueUpdateRequests() {
 //    sendRequestGpioRateBuffer();
     sendRequest(temperatureRequestSig);
     sendRequest(i2cStatsRequestSig);
-    sendRequest(calibRequestSig);
+//    sendRequest(calibRequestSig);
 }
 
 void MainWindow::on_ipButton_clicked()

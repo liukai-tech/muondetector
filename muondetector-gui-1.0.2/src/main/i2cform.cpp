@@ -36,3 +36,13 @@ void I2cForm::onI2cStatsReceived(quint32 bytesRead, quint32 bytesWritten, const 
 	}
 
 }
+
+void I2cForm::on_statsQueryPushButton_clicked()
+{
+    emit i2cStatsRequest();
+}
+
+void I2cForm::on_scanBusPushButton_clicked()
+{
+    emit scanI2cBusRequest();
+}

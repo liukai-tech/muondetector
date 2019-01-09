@@ -24,9 +24,16 @@ public:
     ~I2cForm();
 
 signals:
+    void i2cStatsRequest();
+    void scanI2cBusRequest();
 
 public slots:
 	void onI2cStatsReceived(quint32 bytesRead, quint32 bytesWritten, const QVector<I2cDeviceEntry>& deviceList);
+
+private slots:
+    void on_statsQueryPushButton_clicked();
+
+    void on_scanBusPushButton_clicked();
 
 private:
     Ui::I2cForm *ui;
