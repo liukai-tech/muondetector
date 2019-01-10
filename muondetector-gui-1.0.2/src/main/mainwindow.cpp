@@ -83,7 +83,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // set timer for automatic rate poll
     if (automaticRatePoll){
-        ratePollTimer.setInterval(3000);
+        ratePollTimer.setInterval(5000);
         ratePollTimer.setSingleShot(false);
         connect(&ratePollTimer, &QTimer::timeout, this, &MainWindow::sendRequestGpioRates);
         connect(&ratePollTimer, &QTimer::timeout, this, &MainWindow::sendValueUpdateRequests);
@@ -366,12 +366,12 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
 		{
 			uint8_t addr = 0;
 			QString title = "none";
-			bool present = false;
-			*(tcpMessage.dStream) >> addr >> title >> present;
+			uint8_t status = 0;
+			*(tcpMessage.dStream) >> addr >> title >> status;
 			I2cDeviceEntry entry;
 			entry.address=addr;
 			entry.name = title;
-			entry.online=present;
+			entry.status=status;
 			deviceList.push_back(entry);
 		}
         emit i2cStatsReceived(bytesRead, bytesWritten, deviceList);

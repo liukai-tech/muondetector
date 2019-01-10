@@ -8,7 +8,7 @@
 struct I2cDeviceEntry {
 	uint8_t address;	
 	QString name;
-	bool online;
+	uint8_t status;
 };
 
 namespace Ui {

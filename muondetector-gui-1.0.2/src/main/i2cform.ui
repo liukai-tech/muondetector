@@ -56,6 +56,15 @@
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
        <widget class="QTableWidget" name="devicesTableWidget">
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="sortingEnabled">
+         <bool>false</bool>
+        </property>
         <column>
          <property name="text">
           <string>Address</string>
