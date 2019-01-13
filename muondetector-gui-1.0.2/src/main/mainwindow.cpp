@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qRegisterMetaType<bool>("bool");
     qRegisterMetaType<I2cDeviceEntry>("I2cDeviceEntry");
     qRegisterMetaType<CalibStruct>("CalibStruct");
-
+	qRegisterMetaType<std::vector<GnssSatellite>>("std::vector<GnssSatellite>");
     ui->setupUi(this);
 	ui->discr1Layout->setAlignment(ui->discr1Slider, Qt::AlignHCenter);
     ui->discr2Layout->setAlignment(ui->discr2Slider, Qt::AlignHCenter); // aligns the slider in their vertical layout centered
