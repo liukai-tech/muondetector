@@ -71,7 +71,8 @@ SOURCES += \
 	main/i2cform.cpp \
     main/plotcustom.cpp \
     main/custom_histogram_widget.cpp \
-    main/calibform.cpp
+    main/calibform.cpp \
+    main/gpssatsform.cpp
 
 HEADERS += \
     main/mainwindow.h \
@@ -80,7 +81,8 @@ HEADERS += \
     main/map.h \
 	main/i2cform.h \
     main/custom_histogram_widget.h \
-    main/calibform.h
+    main/calibform.h \
+    main/gpssatsform.h
 
 FORMS += \
     main/mainwindow.ui \
@@ -88,7 +90,8 @@ FORMS += \
     main/status.ui \
     main/map.ui \
 	main/i2cform.ui \
-    main/calibform.ui
+    main/calibform.ui \
+    main/gpssatsform.ui
 
 DISTFILES += \
     qml/mymap.qml

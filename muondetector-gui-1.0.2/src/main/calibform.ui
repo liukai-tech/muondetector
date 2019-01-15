@@ -60,6 +60,9 @@
         <property name="alternatingRowColors">
          <bool>true</bool>
         </property>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>100</number>
+        </attribute>
         <column>
          <property name="text">
           <string>Calib Item</string>

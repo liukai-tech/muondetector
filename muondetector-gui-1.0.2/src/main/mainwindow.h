@@ -13,6 +13,7 @@
 
 struct I2cDeviceEntry;
 struct CalibStruct;
+class GnssSatellite;
 
 namespace Ui {
 	class MainWindow;
@@ -43,6 +44,7 @@ signals:
     void temperatureReceived(float temp);
 	void i2cStatsReceived(quint32 bytesRead, quint32 bytesWritten, const QVector<I2cDeviceEntry>& deviceList);
 	void calibReceived(bool valid, bool eepromValid, quint64 id, const QVector<CalibStruct>& calibList);
+	void satsReceived(const QVector<GnssSatellite>& satList);
 	
 public slots:
 	void receivedTcpMessage(TcpMessage tcpMessage);

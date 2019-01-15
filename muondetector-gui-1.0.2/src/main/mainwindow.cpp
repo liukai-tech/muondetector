@@ -7,12 +7,14 @@
 #include <QErrorMessage>
 #include <gpio_pin_definitions.h>
 #include <calib_struct.h>
+#include <gnsssatellite.h>
 #include <settings.h>
 #include <status.h>
 #include <tcpmessage_keys.h>
 #include <map.h>
 #include <i2cform.h>
 #include <calibform.h>
+#include <gpssatsform.h>
 #include <iostream>
 
 using namespace std;
@@ -28,6 +30,21 @@ QDataStream & operator >> (QDataStream& in, CalibStruct& calib)
 	calib.type = s2.toStdString();
 	calib.address = (uint16_t)u;
 	calib.value = s3.toStdString();
+	return in;
+}
+
+QDataStream& operator >> (QDataStream& in, GnssSatellite& sat)
+{
+/*
+	int fGnssId=0, fSatId=0, fCnr=0, fElev=0, fAzim=0;
+	float fPrRes=0.;
+	int fQuality=0, fHealth=0;
+	int fOrbitSource=0;
+	bool fUsed=false, fDiffCorr=false, fSmoothed=false;
+*/
+	in >> sat.fGnssId >> sat.fSatId >> sat.fCnr >> sat.fElev >> sat.fAzim
+		>> sat.fPrRes >> sat.fQuality >> sat.fHealth >> sat.fOrbitSource
+		>> sat.fUsed >> sat.fDiffCorr >> sat.fSmoothed;
 	return in;
 }
 
@@ -139,6 +156,19 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::adcSampleReceived, calibTab, &CalibForm::onAdcSampleReceived);
     
 	ui->tabWidget->addTab(calibTab,"Calibration");
+
+
+    GpsSatsForm *satsTab = new GpsSatsForm(this);
+    connect(this, &MainWindow::satsReceived, satsTab, &GpsSatsForm::onSatsReceived);
+
+/*
+//    connect(this, &MainWindow::setUiEnabledStates, settings, &Settings::onUiEnabledStateChange);
+    connect(this, &MainWindow::calibReceived, calibTab, &CalibForm::onCalibReceived);
+    connect(calibTab, &CalibForm::calibRequest, this, [this]() { this->sendRequest(calibRequestSig); } );
+    connect(calibTab, &CalibForm::writeCalibToEeprom, this, [this]() { this->sendRequest(calibWriteEepromSig); } );
+    connect(this, &MainWindow::adcSampleReceived, calibTab, &CalibForm::onAdcSampleReceived);
+*/    
+	ui->tabWidget->addTab(satsTab,"GNSS/GPS Data");
 
 	//sendRequest(calibRequestSig);
 
@@ -393,10 +423,22 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
 			calibList.push_back(item);
 		}
         emit calibReceived(valid, eepromValid, id, calibList);
-        //updateUiProperties();
         return;
     }
+    if (msgID == gpsSatsSig){
+		int nrSats=0;    	
+		*(tcpMessage.dStream) >> nrSats;
 
+		QVector<GnssSatellite> satList;
+		for (uint8_t i=0; i<nrSats; i++)
+		{
+			GnssSatellite sat;
+			*(tcpMessage.dStream) >> sat;
+			satList.push_back(sat);
+		}
+        emit satsReceived(satList);
+        return;
+    }
 }
 
 void MainWindow::sendRequest(quint16 requestSig){
