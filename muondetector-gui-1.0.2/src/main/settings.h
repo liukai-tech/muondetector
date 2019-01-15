@@ -32,6 +32,8 @@ public slots:
 	void addUbxMsgRates(QMap<uint16_t, int> ubxMsgRates);
     void onItemChanged(QTableWidgetItem *item);
     void onUiEnabledStateChange(bool connected);
+    void onTxBufReceived(quint8 val);
+    void onTxBufPeakReceived(quint8 val);
 
 private slots:
 
