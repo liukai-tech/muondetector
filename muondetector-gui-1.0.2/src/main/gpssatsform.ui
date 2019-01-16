@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>471</width>
+    <width>475</width>
     <height>511</height>
    </rect>
   </property>
@@ -110,7 +110,7 @@
               <widget class="QLabel" name="ubxSwVersionLabel">
                <property name="minimumSize">
                 <size>
-                 <width>80</width>
+                 <width>95</width>
                  <height>0</height>
                 </size>
                </property>

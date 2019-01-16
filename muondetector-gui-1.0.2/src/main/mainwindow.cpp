@@ -165,6 +165,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::timeAccReceived, satsTab, &GpsSatsForm::onTimeAccReceived);
     connect(this, &MainWindow::intCounterReceived, satsTab, &GpsSatsForm::onIntCounterReceived);
     connect(this, &MainWindow::gpsMonHWReceived, satsTab, &GpsSatsForm::onGpsMonHWReceived);
+    connect(this, &MainWindow::gpsVersionReceived, satsTab, &GpsSatsForm::onGpsVersionReceived);
+    
 
 /*
 //    connect(this, &MainWindow::setUiEnabledStates, settings, &Settings::onUiEnabledStateChange);
@@ -477,6 +479,13 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
 	quint8 flags=0;
 	*(tcpMessage.dStream) >> noise >> agc >> antStatus >> antPower >> jamInd >> flags;
         emit gpsMonHWReceived(noise,agc,antStatus,antPower,jamInd,flags);
+        return;
+    }
+    if (msgID == gpsVersionSig){
+	QString sw="";
+	QString hw="";
+	*(tcpMessage.dStream) >> sw >> hw;
+        emit gpsVersionReceived(sw, hw);
         return;
     }
 }
