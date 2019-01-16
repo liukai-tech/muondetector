@@ -45,6 +45,11 @@ signals:
 	void i2cStatsReceived(quint32 bytesRead, quint32 bytesWritten, const QVector<I2cDeviceEntry>& deviceList);
 	void calibReceived(bool valid, bool eepromValid, quint64 id, const QVector<CalibStruct>& calibList);
 	void satsReceived(const QVector<GnssSatellite>& satList);
+	void timeAccReceived(quint32 acc);
+	void intCounterReceived(quint32 cnt);
+	void txBufReceived(quint8 val);
+	void txBufPeakReceived(quint8 val);
+	void gpsMonHWReceived(quint16 noise, quint16 agc, quint8 antStatus, quint8 antPower, quint8 jamInd, quint8 flags);
 	
 public slots:
 	void receivedTcpMessage(TcpMessage tcpMessage);

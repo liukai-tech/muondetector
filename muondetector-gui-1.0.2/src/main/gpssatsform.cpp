@@ -23,6 +23,12 @@ void GpsSatsForm::onSatsReceived(const QVector<GnssSatellite> &satlist)
     QString str;
     QColor color;
 
+    int nrGoodSats = 0;
+    for (auto it=satlist.begin(); it!=satlist.end(); it++)
+        if (it->fCnr>0) nrGoodSats++;
+
+    ui->nrSatsLabel->setText(QString::number(nrGoodSats));
+
     for (int i=0; i<satlist.size(); i++)
     {
         if (ui->visibleSatsCheckBox->isChecked()) {
@@ -87,6 +93,7 @@ void GpsSatsForm::onSatsReceived(const QVector<GnssSatellite> &satlist)
         newItem11->setFlags(newItem11->flags() & (~Qt::ItemIsEditable));
         newItem11->setSizeHint(QSize(20,24));
         ui->satsTableWidget->setItem(i, 10, newItem11);
+        /*
         QTableWidgetItem *newItem12 = new QTableWidgetItem();
         newItem12->setCheckState(Qt::CheckState::Unchecked);
         if (newlist[i].fSmoothed) newItem12->setCheckState(Qt::CheckState::Checked);
@@ -94,7 +101,51 @@ void GpsSatsForm::onSatsReceived(const QVector<GnssSatellite> &satlist)
         newItem12->setFlags(newItem12->flags() & (~Qt::ItemIsEditable));
         newItem12->setSizeHint(QSize(20,24));
         ui->satsTableWidget->setItem(i, 11, newItem12);
+        */
     }
     //ui->satsTableWidget->resizeColumnsToContents();
     //ui->satsTableWidget->resizeRowsToContents();
+}
+
+void GpsSatsForm::onTimeAccReceived(quint32 acc)
+{
+    ui->timePrecisionLabel->setText(QString::number(acc)+" ns");
+}
+
+void GpsSatsForm::onIntCounterReceived(quint32 cnt)
+{
+    ui->intCounterLabel->setText(QString::number(cnt));
+}
+
+void GpsSatsForm::onGpsMonHWReceived(quint16 noise, quint16 agc, quint8 antStatus, quint8 antPower, quint8 jamInd, quint8 flags)
+{
+    ui->lnaNoiseLabel->setText(QString::number(-noise)+" dBHz");
+    ui->lnaAgcLabel->setText(QString::number(agc));
+    QString str;
+    switch (antStatus) {
+        case 0: str="init";
+                break;
+        case 2: str="OK";
+                break;
+        case 3: str="short";
+                break;
+        case 4: str="open";
+                break;
+        case 1:
+        default:
+                str="unknown";
+    }
+    ui->antStatusLabel->setText(str);
+
+    switch (antPower) {
+        case 0: str="off";
+                break;
+        case 1: str="on";
+                break;
+        case 2:
+        default:
+                str="unknown";
+    }
+    ui->antPowerLabel->setText(str);
+    ui->jammingProgressBar->setValue(jamInd/2.55);
 }

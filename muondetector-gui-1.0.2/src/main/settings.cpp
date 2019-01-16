@@ -116,3 +116,13 @@ void Settings::onUiEnabledStateChange(bool connected){
     }
 }
 
+void Settings::onTxBufReceived(quint8 val)
+{
+    settingsUi->txBufProgressBar->setValue(val);
+}
+
+void Settings::onTxBufPeakReceived(quint8 val)
+{
+    settingsUi->txPeakLabel->setText("max: "+QString::number(val)+"%");
+}
+

@@ -129,6 +129,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     Settings *settings = new Settings(this);
     connect(this, &MainWindow::setUiEnabledStates, settings, &Settings::onUiEnabledStateChange);
+    connect(this, &MainWindow::txBufReceived, settings, &Settings::onTxBufReceived);
+    connect(this, &MainWindow::txBufPeakReceived, settings, &Settings::onTxBufPeakReceived);
     ui->tabWidget->addTab(settings,"settings");
 
     Map *map = new Map(this);
@@ -160,6 +162,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     GpsSatsForm *satsTab = new GpsSatsForm(this);
     connect(this, &MainWindow::satsReceived, satsTab, &GpsSatsForm::onSatsReceived);
+    connect(this, &MainWindow::timeAccReceived, satsTab, &GpsSatsForm::onTimeAccReceived);
+    connect(this, &MainWindow::intCounterReceived, satsTab, &GpsSatsForm::onIntCounterReceived);
+    connect(this, &MainWindow::gpsMonHWReceived, satsTab, &GpsSatsForm::onGpsMonHWReceived);
 
 /*
 //    connect(this, &MainWindow::setUiEnabledStates, settings, &Settings::onUiEnabledStateChange);
@@ -437,6 +442,41 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
 			satList.push_back(sat);
 		}
         emit satsReceived(satList);
+        return;
+    }
+    if (msgID == gpsTimeAccSig){
+	quint32 acc=0;    	
+	*(tcpMessage.dStream) >> acc;
+        emit timeAccReceived(acc);
+        return;
+    }
+    if (msgID == gpsIntCounterSig){
+	quint32 cnt=0;    	
+	*(tcpMessage.dStream) >> cnt;
+        emit intCounterReceived(cnt);
+        return;
+    }
+    if (msgID == gpsTxBufSig){
+	quint8 val=0;    	
+	*(tcpMessage.dStream) >> val;
+        emit txBufReceived(val);
+        return;
+    }
+    if (msgID == gpsTxBufPeakSig){
+	quint8 val=0;    	
+	*(tcpMessage.dStream) >> val;
+        emit txBufPeakReceived(val);
+        return;
+    }
+    if (msgID == gpsMonHWSig){
+	quint16 noise=0;    	
+	quint16 agc=0;
+	quint8 antStatus=0;
+	quint8 antPower=0;
+	quint8 jamInd=0;
+	quint8 flags=0;
+	*(tcpMessage.dStream) >> noise >> agc >> antStatus >> antPower >> jamInd >> flags;
+        emit gpsMonHWReceived(noise,agc,antStatus,antPower,jamInd,flags);
         return;
     }
 }
