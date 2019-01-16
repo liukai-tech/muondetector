@@ -50,6 +50,7 @@ signals:
 	void txBufReceived(quint8 val);
 	void txBufPeakReceived(quint8 val);
 	void gpsMonHWReceived(quint16 noise, quint16 agc, quint8 antStatus, quint8 antPower, quint8 jamInd, quint8 flags);
+	void gpsVersionReceived(const QString& swString, const QString& hwString);
 	
 public slots:
 	void receivedTcpMessage(TcpMessage tcpMessage);

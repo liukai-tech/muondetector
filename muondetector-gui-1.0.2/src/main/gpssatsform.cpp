@@ -149,3 +149,9 @@ void GpsSatsForm::onGpsMonHWReceived(quint16 noise, quint16 agc, quint8 antStatu
     ui->antPowerLabel->setText(str);
     ui->jammingProgressBar->setValue(jamInd/2.55);
 }
+
+void GpsSatsForm::onGpsVersionReceived(const QString &swString, const QString &hwString)
+{
+    ui->ubxHwVersionLabel->setText(hwString);
+    ui->ubxSwVersionLabel->setText(swString);
+}
