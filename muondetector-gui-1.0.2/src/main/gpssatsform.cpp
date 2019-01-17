@@ -1,6 +1,7 @@
 #include "gpssatsform.h"
 #include "ui_gpssatsform.h"
 
+const QVector<QString> FIX_TYPE_STRINGS = { "No Fix", "Dead Reck." , "2D-Fix", "3D-Fix", "GPS+Dead Reck.", "Time Only"  };
 const QString GNSS_ID_STRING[] = { " GPS","SBAS"," GAL","BEID","IMES","QZSS","GLNS"," N/A" };
 
 GpsSatsForm::GpsSatsForm(QWidget *parent) :
@@ -154,4 +155,11 @@ void GpsSatsForm::onGpsVersionReceived(const QString &swString, const QString &h
 {
     ui->ubxHwVersionLabel->setText(hwString);
     ui->ubxSwVersionLabel->setText(swString);
+}
+
+void GpsSatsForm::onGpsFixReceived(quint8 val)
+{
+    QString fixType = "N/A";
+    if (val<FIX_TYPE_STRINGS.size()) fixType=FIX_TYPE_STRINGS[val];
+    ui->fixTypeLabel->setText(fixType);
 }
