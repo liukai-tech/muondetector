@@ -166,6 +166,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::intCounterReceived, satsTab, &GpsSatsForm::onIntCounterReceived);
     connect(this, &MainWindow::gpsMonHWReceived, satsTab, &GpsSatsForm::onGpsMonHWReceived);
     connect(this, &MainWindow::gpsVersionReceived, satsTab, &GpsSatsForm::onGpsVersionReceived);
+    connect(this, &MainWindow::gpsFixReceived, satsTab, &GpsSatsForm::onGpsFixReceived);
     
 
 /*
@@ -486,6 +487,12 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
 	QString hw="";
 	*(tcpMessage.dStream) >> sw >> hw;
         emit gpsVersionReceived(sw, hw);
+        return;
+    }
+    if (msgID == gpsFixSig){
+	quint8 val=0;
+	*(tcpMessage.dStream) >> val;
+        emit gpsFixReceived(val);
         return;
     }
 }
