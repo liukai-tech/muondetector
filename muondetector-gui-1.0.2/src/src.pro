@@ -71,6 +71,7 @@ SOURCES += \
 	main/i2cform.cpp \
     main/plotcustom.cpp \
     main/custom_histogram_widget.cpp \
+    main/custom_plot_widget.cpp \
     main/calibform.cpp \
     main/gpssatsform.cpp
 
@@ -81,6 +82,7 @@ HEADERS += \
     main/map.h \
 	main/i2cform.h \
     main/custom_histogram_widget.h \
+    main/custom_plot_widget.h \
     main/calibform.h \
     main/gpssatsform.h
 

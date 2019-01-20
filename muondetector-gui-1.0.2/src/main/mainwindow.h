@@ -14,6 +14,7 @@
 struct I2cDeviceEntry;
 struct CalibStruct;
 class GnssSatellite;
+class CalibForm;
 
 namespace Ui {
 	class MainWindow;
@@ -50,7 +51,7 @@ signals:
 	void txBufReceived(quint8 val);
 	void txBufPeakReceived(quint8 val);
 	void gpsMonHWReceived(quint16 noise, quint16 agc, quint8 antStatus, quint8 antPower, quint8 jamInd, quint8 flags);
-	void gpsVersionReceived(const QString& swString, const QString& hwString);
+	void gpsVersionReceived(const QString& swString, const QString& hwString, const QString& protString);
 	void gpsFixReceived(quint8 val);
 	
 public slots:
@@ -90,6 +91,15 @@ private slots:
 
 	void on_discr2Edit_editingFinished();
 
+    void on_biasVoltageSlider_sliderReleased();
+
+    void on_biasVoltageSlider_valueChanged(int value);
+
+    void on_biasVoltageSlider_sliderPressed();
+    void onCalibUpdated();
+
+    void on_biasControlTypeComboBox_currentIndexChanged(int index);
+
 private:
 	Ui::MainWindow *ui;
 	void uiSetConnectedState();
@@ -107,7 +117,7 @@ private:
 
     void updateUiProperties();
     int verbose = 0;
-    float biasVoltage = 0;
+    float biasDacVoltage = 0;
     bool biasON, uiValuesUpToDate = false;
     quint8 pcaPortMask = 0;
     QVector<int> sliderValues = QVector<int>({0,0});
@@ -123,6 +133,11 @@ private:
 	bool mouseHold = false;
     bool automaticRatePoll = true;
     QTimer andTimer, xorTimer, ratePollTimer;
+    CalibForm *calib = nullptr;
+    double biasCalibOffset = 0.;
+    double biasCalibSlope = 1.;
+    double minBiasVoltage = 0.;
+    double maxBiasVoltage = 3.3;
 };
 
 #endif // MAINWINDOW_H

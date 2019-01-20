@@ -1,8 +1,33 @@
+#include <cmath>
 #include "gpssatsform.h"
 #include "ui_gpssatsform.h"
 
 const QVector<QString> FIX_TYPE_STRINGS = { "No Fix", "Dead Reck." , "2D-Fix", "3D-Fix", "GPS+Dead Reck.", "Time Only"  };
 const QString GNSS_ID_STRING[] = { " GPS","SBAS"," GAL","BEID","IMES","QZSS","GLNS"," N/A" };
+
+// helper function to format human readable numbers with common suffixes (k(ilo), M(ega), m(illi) etc.)
+QString printReadableFloat(double value, int prec=2, int lowOrderInhibit=-9, int highOrderInhibit=9) {
+    QString str="";
+    QString suffix="";
+    double order=std::log10(std::fabs(value));
+    if (order>=lowOrderInhibit && order<=highOrderInhibit) {
+    if (order>9) { value*=1e-9; suffix="G"; }
+    else if (order>6) { value*=1e-6; suffix="M"; }
+    else if (order>3) { value*=1e-3; suffix="k"; }
+    else if (order>0) { suffix=""; }
+    //else if (order>-2) { value*=100.; suffix="c"; }
+    else if (order>-3) { value*=1000.; suffix="m"; }
+    else if (order>-6) { value*=1e6; suffix="u"; }
+    else if (order>-9) { value*=1e9; suffix="n"; }
+    }
+    char fmtChar='f';
+    double newOrder = std::log10(std::fabs(value));
+    if (fabs(newOrder)>3.) { fmtChar='g'; }
+    else { prec=prec-(int)newOrder - 1;  }
+    if (prec<0) prec=0;
+    return QString::number(value,fmtChar,prec)+suffix;
+}
+
 
 GpsSatsForm::GpsSatsForm(QWidget *parent) :
     QWidget(parent),
@@ -57,7 +82,7 @@ void GpsSatsForm::onSatsReceived(const QVector<GnssSatellite> &satlist)
         QTableWidgetItem *newItem5 = new QTableWidgetItem(QString::number(newlist[i].fElev));
         newItem5->setSizeHint(QSize(100,24));
         ui->satsTableWidget->setItem(i, 4, newItem5);
-        QTableWidgetItem *newItem6 = new QTableWidgetItem(QString::number(newlist[i].fPrRes));
+        QTableWidgetItem *newItem6 = new QTableWidgetItem(printReadableFloat(newlist[i].fPrRes,2,0));
         newItem6->setSizeHint(QSize(60,24));
         ui->satsTableWidget->setItem(i, 5, newItem6);
         QTableWidgetItem *newItem7 = new QTableWidgetItem(QString::number(newlist[i].fQuality));
@@ -110,7 +135,9 @@ void GpsSatsForm::onSatsReceived(const QVector<GnssSatellite> &satlist)
 
 void GpsSatsForm::onTimeAccReceived(quint32 acc)
 {
-    ui->timePrecisionLabel->setText(QString::number(acc)+" ns");
+    double tAcc=acc*1e-9;
+    ui->timePrecisionLabel->setText(printReadableFloat(tAcc)+"s");
+//    ui->timePrecisionLabel->setText(QString::number(acc)+" ns");
 }
 
 void GpsSatsForm::onIntCounterReceived(quint32 cnt)
@@ -125,19 +152,23 @@ void GpsSatsForm::onGpsMonHWReceived(quint16 noise, quint16 agc, quint8 antStatu
     QString str;
     switch (antStatus) {
         case 0: str="init";
+                ui->antStatusLabel->setStyleSheet("QLabel { background-color : yellow }");
                 break;
         case 2: str="OK";
-                break;
+            ui->antStatusLabel->setStyleSheet("QLabel { background-color : Window }");
+            break;
         case 3: str="short";
+                ui->antStatusLabel->setStyleSheet("QLabel { background-color : red }");
                 break;
         case 4: str="open";
+                ui->antStatusLabel->setStyleSheet("QLabel { background-color : red }");
                 break;
         case 1:
         default:
                 str="unknown";
+                ui->antStatusLabel->setStyleSheet("QLabel { background-color : yellow }");
     }
     ui->antStatusLabel->setText(str);
-
     switch (antPower) {
         case 0: str="off";
                 break;
@@ -151,10 +182,11 @@ void GpsSatsForm::onGpsMonHWReceived(quint16 noise, quint16 agc, quint8 antStatu
     ui->jammingProgressBar->setValue(jamInd/2.55);
 }
 
-void GpsSatsForm::onGpsVersionReceived(const QString &swString, const QString &hwString)
+void GpsSatsForm::onGpsVersionReceived(const QString &swString, const QString &hwString, const QString& protString)
 {
     ui->ubxHwVersionLabel->setText(hwString);
     ui->ubxSwVersionLabel->setText(swString);
+    ui->UBXprotLabel->setText(protString);
 }
 
 void GpsSatsForm::onGpsFixReceived(quint8 val)
@@ -162,4 +194,13 @@ void GpsSatsForm::onGpsFixReceived(quint8 val)
     QString fixType = "N/A";
     if (val<FIX_TYPE_STRINGS.size()) fixType=FIX_TYPE_STRINGS[val];
     ui->fixTypeLabel->setText(fixType);
+}
+
+void GpsSatsForm::onGeodeticPosReceived(GeodeticPos pos){
+
+    QString str;
+    str=printReadableFloat(pos.hAcc/1000.,2,0)+"m/"+printReadableFloat(pos.vAcc/1000.,2,0)+"m";
+/*    str=QString::number((float)pos.hAcc/1000.,'f',3)+"m";
+    str+="/"+QString::number((float)pos.vAcc/1000.,'f',3)+"m";
+*/    ui->xyzResLabel->setText(str);
 }

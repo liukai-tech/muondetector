@@ -150,14 +150,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->tabWidget->addTab(i2cTab,"I2C bus");
 
-    CalibForm *calibTab = new CalibForm(this);
+    calib = new CalibForm(this);
 //    connect(this, &MainWindow::setUiEnabledStates, settings, &Settings::onUiEnabledStateChange);
-    connect(this, &MainWindow::calibReceived, calibTab, &CalibForm::onCalibReceived);
-    connect(calibTab, &CalibForm::calibRequest, this, [this]() { this->sendRequest(calibRequestSig); } );
-    connect(calibTab, &CalibForm::writeCalibToEeprom, this, [this]() { this->sendRequest(calibWriteEepromSig); } );
-    connect(this, &MainWindow::adcSampleReceived, calibTab, &CalibForm::onAdcSampleReceived);
-    
-	ui->tabWidget->addTab(calibTab,"Calibration");
+    connect(this, &MainWindow::calibReceived, calib, &CalibForm::onCalibReceived);
+    connect(calib, &CalibForm::calibRequest, this, [this]() { this->sendRequest(calibRequestSig); } );
+    connect(calib, &CalibForm::writeCalibToEeprom, this, [this]() { this->sendRequest(calibWriteEepromSig); } );
+    connect(this, &MainWindow::adcSampleReceived, calib, &CalibForm::onAdcSampleReceived);
+    connect(calib, &CalibForm::setBiasDacVoltage, this, &MainWindow::sendSetBiasVoltage);
+    connect(calib, &CalibForm::updatedCalib, this, &MainWindow::onCalibUpdated);
+    ui->tabWidget->addTab(calib,"Calibration");
 
 
     GpsSatsForm *satsTab = new GpsSatsForm(this);
@@ -167,6 +168,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::gpsMonHWReceived, satsTab, &GpsSatsForm::onGpsMonHWReceived);
     connect(this, &MainWindow::gpsVersionReceived, satsTab, &GpsSatsForm::onGpsVersionReceived);
     connect(this, &MainWindow::gpsFixReceived, satsTab, &GpsSatsForm::onGpsFixReceived);
+    connect(this, &MainWindow::geodeticPos, satsTab, &GpsSatsForm::onGeodeticPosReceived);
     
 
 /*
@@ -184,6 +186,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	// set menu bar actions
     //connect(ui->actionsettings, &QAction::triggered, this, &MainWindow::settings_clicked);
 
+    const QStandardItemModel *model = dynamic_cast<QStandardItemModel*>(ui->biasControlTypeComboBox->model());
+    QStandardItem *item = model->item(1);
+    item->setEnabled(false);
     // initialise all ui elements that will be inactive at start
     uiSetDisconnectedState();
 }
@@ -308,7 +313,7 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
         return;
     }
     if (msgID == biasVoltageSig){
-        *(tcpMessage.dStream) >> biasVoltage;
+        *(tcpMessage.dStream) >> biasDacVoltage;
         updateUiProperties();
         return;
     }
@@ -485,8 +490,9 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
     if (msgID == gpsVersionSig){
 	QString sw="";
 	QString hw="";
-	*(tcpMessage.dStream) >> sw >> hw;
-        emit gpsVersionReceived(sw, hw);
+	QString pv="";
+	*(tcpMessage.dStream) >> sw >> hw >> pv;
+        emit gpsVersionReceived(sw, hw, pv);
         return;
     }
     if (msgID == gpsFixSig){
@@ -518,6 +524,8 @@ void MainWindow::sendSetBiasVoltage(float voltage){
     *(tcpMessage.dStream) << voltage;
     emit sendTcpMessage(tcpMessage);
     emit sendRequest(dacRequestSig, 2);
+//    emit sendRequest(adcSampleRequestSig, 2);
+//    emit sendRequest(adcSampleRequestSig, 3);
 }
 
 void MainWindow::sendSetBiasStatus(bool status){
@@ -647,6 +655,12 @@ void MainWindow::updateUiProperties() {
     ui->discr2Slider->setValue(sliderValues.at(1));
     ui->discr2Edit->setEnabled(true);
     ui->discr2Edit->setText(QString::number(sliderValues.at(1) / 2.0) + "mV");
+    double biasVoltage = biasCalibOffset + biasDacVoltage*biasCalibSlope;
+    ui->biasVoltageDoubleSpinBox->setValue(biasVoltage);
+    ui->biasVoltageSlider->setValue(100*biasVoltage/maxBiasVoltage);
+    // equation:
+    // UBias = c1*UDac + c0
+    // (UBias - c0)/c1 = UDac
 
 	ui->ANDHit->setEnabled(true);
 	ui->ANDHit->setStyleSheet("QLabel {background-color: darkRed; color: white;}");
@@ -854,4 +868,75 @@ void MainWindow::sendInputSwitch(int id) {
     *(tcpMessage.dStream) << (quint8)id;
     emit sendTcpMessage(tcpMessage);
     sendRequest(pcaChannelRequestSig);
+}
+
+void MainWindow::on_biasVoltageSlider_sliderReleased()
+{
+    mouseHold = false;
+    on_biasVoltageSlider_valueChanged(ui->biasVoltageSlider->value());
+}
+
+void MainWindow::on_biasVoltageSlider_valueChanged(int value)
+{
+    if (!mouseHold)
+    {
+        double biasVoltage = (double)value/ui->biasVoltageSlider->maximum()*maxBiasVoltage;
+        if (fabs(biasCalibSlope)<1e-5) return;
+        double dacVoltage = (biasVoltage-biasCalibOffset)/biasCalibSlope;
+        if (dacVoltage<0.) dacVoltage=0.;
+        if (dacVoltage>3.3) dacVoltage=3.3;
+        sendSetBiasVoltage(dacVoltage);
+    }
+    // equation:
+    // UBias = c1*UDac + c0
+    // (UBias - c0)/c1 = UDac
+}
+
+void MainWindow::on_biasVoltageSlider_sliderPressed()
+{
+    mouseHold=true;
+}
+
+void MainWindow::onCalibUpdated()
+{
+    if (calib==nullptr) return;
+    uint8_t flags = calib->getCalibParameter("CALIB_FLAGS").toUInt();
+    bool calibedBias = false;
+    if (flags & CalibStruct::CALIBFLAGS_VOLTAGE_COEFFS) calibedBias=true;
+
+    const QStandardItemModel *model = dynamic_cast<QStandardItemModel*>(ui->biasControlTypeComboBox->model());
+    QStandardItem *item = model->item(1);
+
+    item->setEnabled(calibedBias);
+/*
+    item->setFlags(disable ? item->flags() & ~(Qt::ItemIsSelectable|Qt::ItemIsEnabled)
+                           : Qt::ItemIsSelectable|Qt::ItemIsEnabled));
+    // visually disable by greying out - works only if combobox has been painted already and palette returns the wanted color
+    item->setData(disable ? ui->comboBox->palette().color(QPalette::Disabled, QPalette::Text)
+                          : QVariant(), // clear item data in order to use default color
+                  Qt::TextColorRole);
+*/
+    ui->biasControlTypeComboBox->setCurrentIndex((calibedBias)?1:0);
+}
+
+void MainWindow::on_biasControlTypeComboBox_currentIndexChanged(int index)
+{
+    if (index==1) {
+        if (calib==nullptr) return;
+        QString str = calib->getCalibParameter("COEFF0");
+        if (!str.size()) return;
+        double c0 = str.toDouble();
+        str = calib->getCalibParameter("COEFF1");
+        if (!str.size()) return;
+        double c1 = str.toDouble();
+        biasCalibOffset=c0; biasCalibSlope=c1;
+        minBiasVoltage=0.; maxBiasVoltage=40.;
+        ui->biasVoltageDoubleSpinBox->setMaximum(maxBiasVoltage);
+        ui->biasVoltageDoubleSpinBox->setSingleStep(0.1);
+    } else {
+        biasCalibOffset=0.; biasCalibSlope=1.;
+        minBiasVoltage=0.; maxBiasVoltage=3.3;
+        ui->biasVoltageDoubleSpinBox->setMaximum(maxBiasVoltage);
+        ui->biasVoltageDoubleSpinBox->setSingleStep(0.01);
+    }
 }

@@ -17,7 +17,7 @@
    <string>muondetector-gui</string>
   </property>
   <property name="locale">
-   <locale language="English" country="Germany"/>
+   <locale language="English" country="UnitedStates"/>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="sizePolicy">
@@ -26,14 +26,8 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_2">
-    <property name="spacing">
-     <number>4</number>
-    </property>
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
-    <item>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0" colspan="2">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QLabel" name="ipLabel">
@@ -54,7 +48,7 @@
          <enum>Qt::WheelFocus</enum>
         </property>
         <property name="locale">
-         <locale language="English" country="Germany"/>
+         <locale language="English" country="UnitedStates"/>
         </property>
         <property name="editable">
          <bool>true</bool>
@@ -134,185 +128,35 @@
       </item>
      </layout>
     </item>
-    <item>
+    <item row="1" column="0" colspan="2">
      <widget class="Line" name="line_4">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_4">
+    <item row="2" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <layout class="QVBoxLayout" name="discr1Layout">
           <item>
-           <layout class="QVBoxLayout" name="discr1Layout">
-            <item>
-             <widget class="QLabel" name="discr1Label">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>53</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>thres1</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSlider" name="discr1Slider">
-              <property name="accessibleName">
-               <string/>
-              </property>
-              <property name="maximum">
-               <number>8191</number>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="discr1Edit">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>73</width>
-                <height>24</height>
-               </size>
-              </property>
-              <property name="baseSize">
-               <size>
-                <width>51</width>
-                <height>0</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="discr2Layout">
-            <item>
-             <widget class="QLabel" name="discr2Label">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>53</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>thres2</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSlider" name="discr2Slider">
-              <property name="maximum">
-               <number>8191</number>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="discr2Edit">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>73</width>
-                <height>24</height>
-               </size>
-              </property>
-              <property name="baseSize">
-               <size>
-                <width>51</width>
-                <height>0</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QLabel" name="biasPowerLabel">
-          <property name="text">
-           <string>Bias OFF</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="biasPowerButton">
-          <property name="text">
-           <string>Enable Bias</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="Line" name="line_3">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QLabel" name="XORHit">
+           <widget class="QLabel" name="discr1Label">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>54</horstretch>
-              <verstretch>24</verstretch>
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>54</width>
-              <height>24</height>
+              <width>53</width>
+              <height>0</height>
              </size>
             </property>
             <property name="text">
-             <string>XOR</string>
+             <string>thres1</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -320,21 +164,37 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="ANDHit">
+           <widget class="QSlider" name="discr1Slider">
+            <property name="accessibleName">
+             <string/>
+            </property>
+            <property name="maximum">
+             <number>8191</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="discr1Edit">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>54</horstretch>
-              <verstretch>24</verstretch>
+             <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>54</width>
+              <width>65</width>
               <height>24</height>
              </size>
             </property>
-            <property name="text">
-             <string>AND</string>
+            <property name="baseSize">
+             <size>
+              <width>51</width>
+              <height>0</height>
+             </size>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -344,23 +204,23 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <layout class="QVBoxLayout" name="discr2Layout">
           <item>
-           <widget class="QLabel" name="rate1">
+           <widget class="QLabel" name="discr2Label">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>54</horstretch>
-              <verstretch>24</verstretch>
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>54</width>
-              <height>24</height>
+              <width>53</width>
+              <height>0</height>
              </size>
             </property>
             <property name="text">
-             <string>xRate</string>
+             <string>thres2</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -368,21 +228,37 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="rate2">
+           <widget class="QSlider" name="discr2Slider">
+            <property name="maximum">
+             <number>8191</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="discr2Edit">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>54</horstretch>
-              <verstretch>24</verstretch>
+             <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>54</width>
+              <width>65</width>
               <height>24</height>
              </size>
             </property>
-            <property name="text">
-             <string>aRate</string>
+            <property name="baseSize">
+             <size>
+              <width>51</width>
+              <height>0</height>
+             </size>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -394,18 +270,207 @@
        </layout>
       </item>
       <item>
-       <widget class="QTabWidget" name="tabWidget">
-        <property name="usesScrollButtons">
-         <bool>false</bool>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="biasControlTypeComboBox">
+          <item>
+           <property name="text">
+            <string>Bias DAC Control</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Bias Voltage</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="biasVoltageSlider">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="value">
+           <number>10</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="biasVoltageDoubleSpinBox">
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="suffix">
+           <string>V</string>
+          </property>
+          <property name="maximum">
+           <double>3.300000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.700000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QLabel" name="biasPowerLabel">
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
         </property>
-        <widget class="QWidget" name="widget">
-         <attribute name="title">
-          <string/>
-         </attribute>
-        </widget>
+        <property name="text">
+         <string>Bias OFF</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="biasPowerButton">
+        <property name="text">
+         <string>Enable Bias</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="XORHit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>54</horstretch>
+            <verstretch>24</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>54</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="text">
+           <string>XOR</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="ANDHit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>54</horstretch>
+            <verstretch>24</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>54</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="text">
+           <string>AND</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLabel" name="rate1">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>54</horstretch>
+            <verstretch>24</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>54</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>xRate</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="rate2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>54</horstretch>
+            <verstretch>24</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>54</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>aRate</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
+    </item>
+    <item row="2" column="1">
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="usesScrollButtons">
+       <bool>false</bool>
+      </property>
+      <widget class="QWidget" name="widget">
+       <attribute name="title">
+        <string/>
+       </attribute>
+      </widget>
+     </widget>
     </item>
    </layout>
   </widget>
