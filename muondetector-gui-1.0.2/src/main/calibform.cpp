@@ -3,11 +3,14 @@
 #include "ui_calibform.h"
 #include <calib_struct.h>
 #include <qwt_symbol.h>
+#include <string>
 
 #define calVoltMin 0.5
 #define calVoltMax 2.5
 
+using namespace std;
 
+const static CalibStruct invalidCalibItem;
 
 inline static double sqr(double x) {
         return x*x;
@@ -121,7 +124,8 @@ void CalibForm::onCalibReceived(bool valid, bool eepromValid, quint64 id, const 
         fCalibList.push_back(calibList[i]);
     }
     updateCalibTable();
-    emit updatedCalib();
+    QVector<CalibStruct> emptyList;
+    emit updatedCalib(emptyList);
 }
 
 void CalibForm::updateCalibTable()
@@ -269,15 +273,23 @@ void CalibForm::on_transferBiasCoeffsPushButton_clicked()
 {
     // transfer to calib
     if (ui->transferBiasCoeffsPushButton->isEnabled()) {
+        QVector<CalibStruct> items;
         std::string str=QString::number(fOffs1).toStdString();
-        if (str.size()) setCalibParameter("COEFF0",str);
+        if (str.size()) {
+            setCalibParameter("COEFF0",str);
+            items.push_back(getCalibItem("COEFF0"));
+        }
         str=QString::number(fSlope1).toStdString();
-        if (str.size()) setCalibParameter("COEFF1",str);
+        if (str.size()) {
+            setCalibParameter("COEFF1",str);
+            items.push_back(getCalibItem("COEFF1"));
+        }
         uint8_t flags=getCalibParameter("CALIB_FLAGS").toUInt();
         flags |= CalibStruct::CALIBFLAGS_VOLTAGE_COEFFS;
         setCalibParameter("CALIB_FLAGS",QString::number(flags).toStdString());
+        items.push_back(getCalibItem("CALIB_FLAGS"));
         updateCalibTable();
-        emit updatedCalib();
+        emit updatedCalib(items);
     }
 }
 
@@ -300,5 +312,17 @@ QString CalibForm::getCalibParameter(const QString &name)
         }
     }
     return "";
+}
+
+const CalibStruct& CalibForm::getCalibItem(const QString &name)
+{
+
+    if (!fCalibList.empty()) {
+        QVector<CalibStruct>::iterator result = std::find_if(fCalibList.begin(), fCalibList.end(), [&name](const CalibStruct& s){ return s.name==name.toStdString(); } );
+        if (result != fCalibList.end()) {
+            return *result;
+        }
+    }
+    return invalidCalibItem;
 }
 

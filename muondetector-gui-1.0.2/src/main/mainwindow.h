@@ -96,7 +96,7 @@ private slots:
     void on_biasVoltageSlider_valueChanged(int value);
 
     void on_biasVoltageSlider_sliderPressed();
-    void onCalibUpdated();
+    void onCalibUpdated(const QVector<CalibStruct>& items);
 
     void on_biasControlTypeComboBox_currentIndexChanged(int index);
 

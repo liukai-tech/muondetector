@@ -22,12 +22,13 @@ signals:
     void calibRequest();
     void writeCalibToEeprom();
     void setBiasDacVoltage(float val);
-    void updatedCalib();
+    void updatedCalib(const QVector<CalibStruct>& items);
 
 public slots:
     void onCalibReceived(bool valid, bool eepromValid, quint64 id, const QVector<CalibStruct>& calibList);
     void onAdcSampleReceived(uint8_t channel, float value);
     QString getCalibParameter(const QString& name);
+    const CalibStruct& getCalibItem(const QString& name);
 
 private slots:
     void on_readCalibPushButton_clicked();

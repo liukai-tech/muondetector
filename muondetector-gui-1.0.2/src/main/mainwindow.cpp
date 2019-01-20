@@ -33,6 +33,13 @@ QDataStream & operator >> (QDataStream& in, CalibStruct& calib)
 	return in;
 }
 
+QDataStream& operator << (QDataStream& out, const CalibStruct& calib)
+{
+    out << QString::fromStdString(calib.name) << QString::fromStdString(calib.type)
+     << (quint16)calib.address << QString::fromStdString(calib.value);
+    return out;
+}
+
 QDataStream& operator >> (QDataStream& in, GnssSatellite& sat)
 {
 /*
@@ -897,9 +904,19 @@ void MainWindow::on_biasVoltageSlider_sliderPressed()
     mouseHold=true;
 }
 
-void MainWindow::onCalibUpdated()
+void MainWindow::onCalibUpdated(const QVector<CalibStruct>& items)
 {
     if (calib==nullptr) return;
+
+    TcpMessage tcpMessage(calibSetSig);
+    if (items.size()) {
+        *(tcpMessage.dStream) << (quint8)items.size();
+        for (int i=0; i<items.size(); i++) {
+            *(tcpMessage.dStream) << items[i];
+        }
+        emit sendTcpMessage(tcpMessage);
+    }
+
     uint8_t flags = calib->getCalibParameter("CALIB_FLAGS").toUInt();
     bool calibedBias = false;
     if (flags & CalibStruct::CALIBFLAGS_VOLTAGE_COEFFS) calibedBias=true;
