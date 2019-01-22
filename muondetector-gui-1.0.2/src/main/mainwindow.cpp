@@ -718,7 +718,7 @@ void MainWindow::connected() {
 
 void MainWindow::sendValueUpdateRequests() {
     sendRequest(biasVoltageRequestSig);
-//    sendRequest(biasRequestSig);
+    sendRequest(biasRequestSig);
 //    sendRequest(preampRequestSig,0);
 //    sendRequest(preampRequestSig,1);
 //    sendRequest(threshRequestSig);
