@@ -17,6 +17,11 @@
 
 using namespace CryptoPP;
 
+
+const int timeout = 600000; // in msecs
+const int uploadReminderInterval = 5; // in minutes
+const int logReminderInterval = 5; // in minutes
+
 static std::string SHA256HashString(std::string aString){
     std::string digest;
     CryptoPP::SHA256 hash;
@@ -26,224 +31,7 @@ static std::string SHA256HashString(std::string aString){
     return digest;
 }
 
-FileHandler::FileHandler(QString userName, QString passWord, QString dataPath, quint32 fileSizeMB, QObject *parent)
-    : QObject(parent)
-{
-    if (dataPath != ""){
-        mainDataFolderName = dataPath;
-    }
-    QDir temp;
-    QString fullPath = temp.homePath()+"/"+mainDataFolderName;
-    QCryptographicHash hashFunction(QCryptographicHash::Sha3_256);
-    hashedMacAddress = QString(hashFunction.hash(getMacAddressByteArray(), QCryptographicHash::Sha3_224).toHex());
-    fullPath += hashedMacAddress;
-    configPath = fullPath+"/";
-    configFilePath = fullPath + "/currentWorkingFileInformation.conf";
-    loginDataFilePath = fullPath + "/loginData.save";
-    fullPath += "/notUploadedFiles/";
-    dataFolderPath = fullPath;
-    if (!temp.exists(fullPath)){
-        temp.mkpath(fullPath);
-        if (!temp.exists(fullPath)){
-            qDebug() << "could not create folder " << fullPath;
-        }
-    }
-    QString uploadedFiles = configPath+"uploadedFiles/";
-    if (!temp.exists(uploadedFiles)){
-        temp.mkpath(uploadedFiles);
-        if (!temp.exists(uploadedFiles)){
-            qDebug() << "could not create folder " << uploadedFiles;
-        }
-    }
-
-    if (userName!=""||passWord!=""){
-        username=userName;
-        password=passWord;
-        if(!saveLoginData(userName,passWord)){
-            qDebug() << "could not save login data";
-        }
-    }else{
-        if (!readLoginData()){
-            qDebug() << "could not read login data from file";
-        }
-    }
-
-    QTimer *uploadReminder = new QTimer(this);
-    uploadReminder->setInterval(60*1000*15); // every 15 minutes or so
-    uploadReminder->setSingleShot(false);
-    connect(uploadReminder, &QTimer::timeout, this, &FileHandler::onUploadRemind);
-    fileSize = fileSizeMB;
-    openFiles();
-    uploadReminder->start();
-}
-
-bool FileHandler::readFileInformation(){
-    QDir directory(dataFolderPath);
-    notUploadedFilesNames = directory.entryList(QStringList() << "*.dat",QDir::Files);
-    QFile configFile(configFilePath);
-    if (!configFile.open(QIODevice::ReadWrite)){
-        qDebug() << "file open failed in 'ReadWrite' mode at location " << configFilePath;
-        return false;
-    }
-    QTextStream in(&configFile);
-    currentWorkingFilePath = in.readLine();
-    currentWorkingLogPath = in.readLine();
-    return true;
-}
-
-// SLOTS
-void FileHandler::gpsVersion(const QString& swVersion, const QString& hwVersion, const QString& protVersion){
-
-}
-void FileHandler::gpsMonHW(uint16_t noise, uint16_t agc, uint8_t antStatus, uint8_t antPower, uint8_t jamInd, uint8_t flags){
-
-}
-
-
-// DATA SAVING
-bool FileHandler::openFiles(){
-    if (dataFile != nullptr || logFile != nullptr){
-        return false;
-    }
-    if (currentWorkingFilePath==""||currentWorkingLogPath==""){
-        readFileInformation();
-    }
-    if (currentWorkingFilePath==""){
-        QString fileNamePart = createFileName();
-        currentWorkingFilePath = dataFolderPath+"data_"+fileNamePart;
-        currentWorkingLogPath = dataFolderPath+"log_"+fileNamePart;
-        while (notUploadedFilesNames.contains(QFileInfo(currentWorkingFilePath).fileName())){
-            fileNamePart = createFileName();
-            currentWorkingFilePath = dataFolderPath+"data_"+fileNamePart;
-            currentWorkingLogPath = dataFolderPath+"log_"+fileNamePart;
-        }
-        QFile configFile(configFilePath);
-        if (!configFile.open(QIODevice::ReadWrite)){
-            qDebug() << "file open failed in 'ReadWrite' mode at location " << configFilePath;
-            return false;
-        }
-        configFile.resize(0);
-        QTextStream out(&configFile);
-        out << currentWorkingFilePath << endl << currentWorkingLogPath << endl;
-    }
-    dataFile = new QFile(currentWorkingFilePath);
-    if (!dataFile->open(QIODevice::ReadWrite | QIODevice::Append)) {
-        qDebug() << "file open failed in 'ReadWrite' mode at location " << currentWorkingFilePath;
-        return false;
-    }
-    logFile = new QFile(currentWorkingLogPath);
-    if (!logFile->open(QIODevice::ReadWrite | QIODevice::Append)) {
-        qDebug() << "file open failed in 'ReadWrite' mode at location " << currentWorkingLogPath;
-        return false;
-    }
-    return true;
-}
-
-void FileHandler::writeToDataFile(QString data){
-    if (dataFile == nullptr){
-        return;
-    }
-    QTextStream out(dataFile);
-    out << data;
-}
-
-void FileHandler::writeToLogFile(QString log) {
-    if (logFile == nullptr){
-        return;
-    }
-    QTextStream out(logFile);
-    out << log;
-}
-
-bool FileHandler::uploadDataFile(QString fileName){
-    QProcess lftpProcess(this);
-    lftpProcess.setProgram("lftp");
-    QStringList arguments;
-    arguments << "-p" << "35221";
-    arguments << "-u" << QString(username+","+password);
-    arguments << "balu.physik.uni-giessen.de:/cosmicshower";
-    arguments << "-e" << QString("mkdir "+hashedMacAddress+" ; cd "+hashedMacAddress+" && put "+fileName+" ; exit");
-    lftpProcess.setArguments(arguments);
-    lftpProcess.start();
-    const int timeout = 300000;
-    if (!lftpProcess.waitForFinished(timeout)){
-        qDebug() << lftpProcess.readAllStandardOutput();
-        qDebug() << lftpProcess.readAllStandardError();
-        qDebug() << "lftp not installed or timed out after "<< timeout/1000<< " s";
-        return false;
-    }
-    if (lftpProcess.exitStatus()!=0){
-        qDebug() << "lftp returned exit status other than 0";
-        return false;
-    }
-    return true;
-}
-
-bool FileHandler::uploadRecentDataFiles(){
-    readFileInformation();
-    for (auto &fileName : notUploadedFilesNames){
-        QString filePath = dataFolderPath+fileName;
-        if (filePath!=currentWorkingFilePath&&filePath!=currentWorkingLogPath){
-            qDebug() << "attempt to upload " << filePath;
-            if (!uploadDataFile(filePath)){
-                return false;
-            }
-            QFile::rename(filePath,QString(configPath+"uploadedFiles/"+fileName));
-        }
-    }
-    return true;
-}
-
-void FileHandler::closeFiles(){
-    if (dataFile->isOpen()){
-        dataFile->close();
-    }
-    if (logFile->isOpen()){
-        logFile->close();
-    }
-    if (dataFile != nullptr){
-        delete dataFile;
-        dataFile = nullptr;
-    }
-    if (logFile != nullptr){
-        delete logFile;
-        logFile = nullptr;
-    }
-}
-
-bool FileHandler::switchFiles(QString fileName){
-    if (dataFile == nullptr){
-        return false;
-    }
-    if (currentWorkingFilePath==""||currentWorkingLogPath==""){
-        if (!readFileInformation()){
-            return false;
-        }
-    }
-    closeFiles();
-    currentWorkingFilePath = "data_"+fileName;
-    currentWorkingLogPath = "log_"+fileName;
-    if (fileName==""){
-        QString fileNamePart = createFileName();
-        currentWorkingFilePath = dataFolderPath+"data_"+fileNamePart;
-        currentWorkingLogPath = dataFolderPath+"log_"+fileNamePart;
-    }
-    if (!openFiles()){
-        closeFiles();
-        return false;
-    }
-    QFile configFile(configFilePath);
-    if (!configFile.open(QIODevice::ReadWrite | QIODevice::Truncate)){
-        qDebug() << "file open failed in 'ReadWrite' mode at location " << configFilePath;
-        return false;
-    }
-    configFile.resize(0);
-    QTextStream out(&configFile);
-    out << currentWorkingFilePath;
-    return true;
-}
-
-QString FileHandler::getMacAddress(){
+static QString getMacAddress(){
     QNetworkConfiguration nc;
     QNetworkConfigurationManager ncm;
     QList<QNetworkConfiguration> configsForEth,configsForWLAN,allConfigs;
@@ -284,20 +72,83 @@ QString FileHandler::getMacAddress(){
     return MAC;
 }
 
-QByteArray FileHandler::getMacAddressByteArray(){
+static QByteArray getMacAddressByteArray(){
     return QByteArray::fromStdString(getMacAddress().toStdString());
 }
 
-QString FileHandler::createFileName(){
-    // creates a fileName based on date time and mac address
-    if (dataFolderPath==""){
-        qDebug() << "could not open data folder";
-        return "";
+static QString dateStringNow(){
+    return QDateTime::currentDateTimeUtc().toString("yyyy-MM-dd_hh-mm-ss");
+}
+
+FileHandler::FileHandler(QString userName, QString passWord, QString dataPath, quint32 fileSizeMB, QObject *parent)
+    : QObject(parent)
+{
+    lastUploadDateTime = QDateTime(QDate::currentDate(),QTime(0,0,0,0),Qt::TimeSpec::UTC);
+    dailyUploadTime = QTime(11,11,11,111);
+    if (dataPath != ""){
+        mainDataFolderName = dataPath;
     }
-    QDateTime dateTime = QDateTime::currentDateTimeUtc();
-    QString fileName = (dateTime.toString("yyyy-MM-dd_hh-mm-ss"));
-    fileName = fileName+".dat";
-    return fileName;
+    fileSize = fileSizeMB;
+    QDir temp;
+    QString fullPath = temp.homePath()+"/"+mainDataFolderName;
+    QCryptographicHash hashFunction(QCryptographicHash::Sha3_256);
+    hashedMacAddress = QString(hashFunction.hash(getMacAddressByteArray(), QCryptographicHash::Sha3_224).toHex());
+    fullPath += hashedMacAddress;
+    configPath = fullPath+"/";
+    configFilePath = fullPath + "/currentWorkingFileInformation.conf";
+    loginDataFilePath = fullPath + "/loginData.save";
+    fullPath += "/notUploadedFiles/";
+    dataFolderPath = fullPath;
+    if (!temp.exists(fullPath)){
+        temp.mkpath(fullPath);
+        if (!temp.exists(fullPath)){
+            qDebug() << "could not create folder " << fullPath;
+        }
+    }
+    QString uploadedFiles = configPath+"uploadedFiles/";
+    if (!temp.exists(uploadedFiles)){
+        temp.mkpath(uploadedFiles);
+        if (!temp.exists(uploadedFiles)){
+            qDebug() << "could not create folder " << uploadedFiles;
+        }
+    }
+
+    if (userName!=""||passWord!=""){
+        username=userName;
+        password=passWord;
+        if(!saveLoginData(userName,passWord)){
+            qDebug() << "could not save login data";
+        }
+    }else{
+        if (!readLoginData()){
+            qDebug() << "could not read login data from file";
+        }
+    }
+    // set upload reminder
+    QTimer *uploadReminder = new QTimer(this);
+    uploadReminder->setInterval(60*1000*uploadReminderInterval); // every 5 minutes or so
+    uploadReminder->setSingleShot(false);
+    connect(uploadReminder, &QTimer::timeout, this, &FileHandler::onUploadRemind);
+    uploadReminder->start();
+    // set log reminder
+    QTimer *logReminder = new QTimer(this);
+    logReminder->setInterval(60*1000*logReminderInterval);
+    uploadReminder->setSingleShot(false);
+    connect(logReminder, &QTimer::timeout, this, &FileHandler::onLogRemind);
+    logReminder->start();
+    // open files that are currently written
+    openFiles();
+}
+
+// SLOTS
+void FileHandler::onReceivedLogParameter(LogParameter log){
+    writeToLogFile(QString(log.name()+" "+log.value()+" "+dateStringNow()));
+    log.setUpdatedRecently(true);
+    logData.insert(log.name(),log);
+}
+
+void FileHandler::onLogRemind(){
+
 }
 
 void FileHandler::onUploadRemind(){
@@ -308,11 +159,193 @@ void FileHandler::onUploadRemind(){
     if (dataFile->size()>(1024*1024*fileSize)){
         switchFiles();
     }
-    if (lastUploadDateTime<todaysRegularUploadTime){
+    if (lastUploadDateTime<todaysRegularUploadTime&&QDateTime::currentDateTimeUtc()>todaysRegularUploadTime){
         switchFiles();
         uploadRecentDataFiles();
+        lastUploadDateTime = QDateTime::currentDateTimeUtc();
     }
 }
+
+// DATA SAVING
+bool FileHandler::openFiles(){
+    if (dataFile != nullptr || logFile != nullptr){
+        return false;
+    }
+    if (currentWorkingFilePath==""||currentWorkingLogPath==""){
+        readFileInformation();
+    }
+    bool newFilePair = false;
+    if (currentWorkingFilePath==""||currentWorkingLogPath==""){
+        newFilePair = true;
+        switchFiles();
+        QString fileNamePart = createFileName();
+        currentWorkingFilePath = dataFolderPath+"data_"+fileNamePart;
+        currentWorkingLogPath = dataFolderPath+"log_"+fileNamePart;
+        while (notUploadedFilesNames.contains(QFileInfo(currentWorkingFilePath).fileName())){
+            fileNamePart = createFileName();
+            currentWorkingFilePath = dataFolderPath+"data_"+fileNamePart;
+            currentWorkingLogPath = dataFolderPath+"log_"+fileNamePart;
+        }
+        QFile configFile(configFilePath);
+        if (!configFile.open(QIODevice::ReadWrite)){
+            qDebug() << "file open failed in 'ReadWrite' mode at location " << configFilePath;
+            return false;
+        }
+        configFile.resize(0);
+        QTextStream out(&configFile);
+        out << currentWorkingFilePath << endl << currentWorkingLogPath << endl;
+    }
+    dataFile = new QFile(currentWorkingFilePath);
+    if (!dataFile->open(QIODevice::ReadWrite | QIODevice::Append)) {
+        qDebug() << "file open failed in 'ReadWrite' mode at location " << currentWorkingFilePath;
+        return false;
+    }
+    logFile = new QFile(currentWorkingLogPath);
+    if (!logFile->open(QIODevice::ReadWrite | QIODevice::Append)) {
+        qDebug() << "file open failed in 'ReadWrite' mode at location " << currentWorkingLogPath;
+        return false;
+    }
+    // write header
+    if (newFilePair){
+        QTextStream dataOut(dataFile);
+        dataOut << "#rising               falling               accEst valid timebase utc\n";
+        QTextStream logOut(logFile);
+        logOut << "#temperature ... etc.\n";
+    }
+    return true;
+}
+
+void FileHandler::closeFiles(){
+    if (dataFile!=nullptr){
+        if (dataFile->isOpen()){
+            dataFile->close();
+        }
+        delete dataFile;
+        dataFile = nullptr;
+    }
+    if (logFile != nullptr){
+        if (logFile->isOpen()){
+            logFile->close();
+        }
+        delete logFile;
+        logFile = nullptr;
+    }
+}
+
+bool FileHandler::switchFiles(QString fileName){
+    closeFiles();
+    currentWorkingFilePath = "data_"+fileName;
+    currentWorkingLogPath = "log_"+fileName;
+    if (fileName==""){
+        QString fileNamePart = createFileName();
+        currentWorkingFilePath = dataFolderPath+"data_"+fileNamePart;
+        currentWorkingLogPath = dataFolderPath+"log_"+fileNamePart;
+    }
+    if (!openFiles()){
+        closeFiles();
+        return false;
+    }
+    QFile configFile(configFilePath);
+    if (!configFile.open(QIODevice::ReadWrite | QIODevice::Truncate)){
+        qDebug() << "file open failed in 'ReadWrite' mode at location " << configFilePath;
+        return false;
+    }
+    configFile.resize(0);
+    QTextStream out(&configFile);
+    out << currentWorkingFilePath << endl << currentWorkingLogPath << endl;
+    return true;
+}
+
+bool FileHandler::readFileInformation(){
+    QDir directory(dataFolderPath);
+    notUploadedFilesNames = directory.entryList(QStringList() << "*.dat",QDir::Files);
+    QFile configFile(configFilePath);
+    if (!configFile.open(QIODevice::ReadWrite)){
+        qDebug() << "file open failed in 'ReadWrite' mode at location " << configFilePath;
+        return false;
+    }
+    QTextStream in(&configFile);
+    if(configFile.size()==0){
+        return true;
+    }
+    if (!in.atEnd()){
+        currentWorkingFilePath = in.readLine();
+    }
+    if (!in.atEnd()){
+        currentWorkingLogPath = in.readLine();
+    }
+    return true;
+}
+
+void FileHandler::writeToDataFile(const QString &data){
+    if (dataFile == nullptr){
+        return;
+    }
+    QTextStream out(dataFile);
+    out << data;
+}
+
+void FileHandler::writeToLogFile(QString log) {
+    if (logFile == nullptr){
+        return;
+    }
+    QTextStream out(logFile);
+    out << log;
+}
+
+QString FileHandler::createFileName(){
+    // creates a fileName based on date time and mac address
+    if (dataFolderPath==""){
+        qDebug() << "could not open data folder";
+        return "";
+    }
+    QString fileName = dateStringNow();
+    fileName = fileName+".dat";
+    return fileName;
+}
+
+// upload related stuff
+
+bool FileHandler::uploadDataFile(QString fileName){
+    QProcess lftpProcess(this);
+    lftpProcess.setProgram("lftp");
+    QStringList arguments;
+    arguments << "-p" << "35221";
+    arguments << "-u" << QString(username+","+password);
+    arguments << "balu.physik.uni-giessen.de:/cosmicshower";
+    arguments << "-e" << QString("mkdir "+hashedMacAddress+" ; cd "+hashedMacAddress+" && put "+fileName+" ; exit");
+    lftpProcess.setArguments(arguments);
+    qDebug() << lftpProcess.arguments();
+    lftpProcess.start();
+    if (!lftpProcess.waitForFinished(timeout)){
+        qDebug() << lftpProcess.readAllStandardOutput();
+        qDebug() << lftpProcess.readAllStandardError();
+        qDebug() << "lftp not installed or timed out after "<< timeout/1000<< " s";
+        return false;
+    }
+    if (lftpProcess.exitStatus()!=0){
+        qDebug() << "lftp returned exit status other than 0";
+        return false;
+    }
+    return true;
+}
+
+bool FileHandler::uploadRecentDataFiles(){
+    readFileInformation();
+    for (auto &fileName : notUploadedFilesNames){
+        QString filePath = dataFolderPath+fileName;
+        if (filePath!=currentWorkingFilePath&&filePath!=currentWorkingLogPath){
+            qDebug() << "attempt to upload " << filePath;
+            if (!uploadDataFile(filePath)){
+                return false;
+            }
+            QFile::rename(filePath,QString(configPath+"uploadedFiles/"+fileName));
+        }
+    }
+    return true;
+}
+
+// crypto related stuff
 
 bool FileHandler::saveLoginData(QString username, QString password){
     QFile loginDataFile(loginDataFilePath);

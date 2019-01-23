@@ -21,6 +21,8 @@ extern "C" {
 #define DAC_TH1 0 // channel of the dac where threshold 1 is set
 #define DAC_TH2 1 // channel of the dac where threshold 2 is set
 
+// REMEMBER: "emit" keyword is just syntactic sugar and not needed AT ALL ... learned it after 1 year *clap* *clap*
+
 using namespace std;
 
 static const QVector<uint16_t> allMsgCfgID({
@@ -203,13 +205,19 @@ Daemon::Daemon(QString username, QString password, QString new_gpsdevname, int n
 
 	// set all variables
 
+    // create fileHandler
+    QThread *fileHandlerThread = new QThread();
+    fileHandler = new FileHandler(username, password);
+    fileHandler->moveToThread(fileHandlerThread);
+    connect(this, &Daemon::aboutToQuit, fileHandler, &FileHandler::deleteLater);
+    connect(this, &Daemon::logParameter, fileHandler, &FileHandler::onReceivedLogParameter);
+    connect(fileHandlerThread, &QThread::finished, fileHandlerThread, &QThread::deleteLater);
+    fileHandlerThread->start();
+
 	// general
 	verbose = new_verbose;
 	if (verbose > 4) {
         cout << "daemon running in thread " << QString("0x%1").arg((intptr_t)this->thread()) << endl;
-	}
-    if (fileHandler == nullptr){
-        fileHandler = new FileHandler(username, password);
     }
 
 	// for pigpio signals:
@@ -479,7 +487,6 @@ Daemon::~Daemon() {
     if (eep!=nullptr){ delete eep; eep = nullptr; }
     if (calib!=nullptr){ delete calib; calib = nullptr; }
     if (pigHandler!=nullptr){ delete pigHandler; pigHandler = nullptr; }
-    if (fileHandler!=nullptr){ delete fileHandler; fileHandler = nullptr; }
 }
 
 void Daemon::connectToGps() {
@@ -522,10 +529,25 @@ void Daemon::connectToGps() {
     connect(qtGps, &QtSerialUblox::gpsVersion, this, &Daemon::UBXReceivedVersion);
 	connect(qtGps, &QtSerialUblox::UBXCfgError, this, &Daemon::toConsole);
 	connect(this, &Daemon::UBXSetDynModel, qtGps, &QtSerialUblox::setDynamicModel);
+
+    // connect fileHandler related stuff
+    connect(qtGps, &QtSerialUblox::gpsPropertyUpdatedGeodeticPos, [this](GeodeticPos pos){
+        LogParameter log("geodeticPos",QString("%1 %2 %3 %4 %5 %6 %7").arg(pos.iTOW).arg(pos.lon).arg(pos.lat).arg(pos.height).arg(pos.hMSL).arg(pos.hAcc).arg(pos.vAcc));
+        this->logParameter(log);
+    });
+    connect(qtGps, &QtSerialUblox::gpsPropertyUpdatedGnss, [this](std::vector<GnssSatellite> satlist, std::chrono::duration<double> updateAge){
+        for (auto sat : satlist){
+            LogParameter log("gnss",QString("%1 %2 %3 %4").arg(sat.fSatId)); // HERE CONTINUE TO IMPLEMENT !!! NOT FINISHED !!!
+            this->logParameter(log);
+        }
+    });
+    connect(qtGps, &QtSerialUblox::gpsMonHW, [this](uint16_t noise, uint16_t agc, uint8_t antStatus, uint8_t antPower, uint8_t jamInd, uint8_t flags){
+        LogParameter log("gpsMonHw",QString("%1 %2 %3 %4 %5 %6").arg(noise).arg(agc).arg(antStatus).arg(antPower).arg(jamInd).arg(flags));
+        this->logParameter(log);
+    });
     if (fileHandler != nullptr){
         connect(qtGps, &QtSerialUblox::timTM2, fileHandler, &FileHandler::writeToDataFile);
     }
-
 	// after thread start there will be a signal emitted which starts the qtGps makeConnection function
 	gpsThread->start();
 }
@@ -856,9 +878,6 @@ void Daemon::getTemperature(){
     }
     TcpMessage tcpMessage(temperatureSig);
     float value = lm75->getTemperature();
-    if (fileHandler!=nullptr){
-        fileHandler->temperature = value;
-    }
     *(tcpMessage.dStream) << value;
     emit sendTcpMessage(tcpMessage);
 }
@@ -876,10 +895,7 @@ void Daemon::setPcaChannel(uint8_t channel) {
 		return;
 	}
     pcaPortMask = channel;
-	pca->setOutputState(channel);
-    if (fileHandler!=nullptr){
-        fileHandler->pcaChannel = (quint8)channel;
-    }
+    pca->setOutputState(channel);
     sendPcaChannel();
 }
 
@@ -1224,11 +1240,11 @@ void Daemon::UBXReceivedVersion(const QString& swString, const QString& hwString
     emit sendTcpMessage(tcpMessage);
 }
 
-void Daemon::toConsole(QString data) {
+void Daemon::toConsole(const QString &data) {
 	cout << data << endl;
 }
 
-void Daemon::gpsToConsole(QString data) {
+void Daemon::gpsToConsole(const QString &data) {
 	cout << data << flush;
 }
 

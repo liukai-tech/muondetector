@@ -12,6 +12,7 @@
 #include <filehandler.h>
 #include "i2c/i2cdevices.h"
 #include "calibration.h"
+#include <logparameter.h>
 
 // for sig handling:
 #include <sys/types.h>
@@ -44,8 +45,8 @@ public slots:
 	void connectToServer();
 	void displaySocketError(int socketError, QString message);
 	void displayError(QString message);
-	void toConsole(QString data);
-	void gpsToConsole(QString data);
+    void toConsole(const QString& data);
+    void gpsToConsole(const QString& data);
 	void stoppedConnection(QString hostName, quint16 port, quint32 connectionTimeout, quint32 connectionDuration);
 	void UBXReceivedAckNak(uint16_t ackedMsgID, uint16_t ackedCfgMsgID);
 	void UBXReceivedMsgRateCfg(uint16_t msgID, uint8_t rate);
@@ -73,6 +74,7 @@ public slots:
 signals:
 	void sendTcpMessage(TcpMessage tcpMessage);
     void closeConnection(QString closeAddress);
+    void logParameter(LogParameter log);
 	void aboutToQuit();
 	void sendPollUbxMsgRate(uint16_t msgID);
 	void sendPollUbxMsg(uint16_t msgID);
@@ -135,7 +137,7 @@ private:
 	int gpsTimeout = 5000;
 	bool dumpRaw, configGnss, showout, showin;
 
-    // data handling
+    // file handling
     FileHandler *fileHandler = nullptr;
 
     // signal handling
