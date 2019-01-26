@@ -29,6 +29,7 @@ public slots:
     void onAdcSampleReceived(uint8_t channel, float value);
     QString getCalibParameter(const QString& name);
     const CalibStruct& getCalibItem(const QString& name);
+    bool biasCalibValid();
 
 private slots:
     void on_readCalibPushButton_clicked();
@@ -37,18 +38,23 @@ private slots:
     void doFit();
     void on_transferBiasCoeffsPushButton_clicked();
 
-    void setCalibParameter(const std::string& name, const std::string& value);
+    void setCalibParameter(const QString &name, const QString &value);
 
     void updateCalibTable();
+
+    void on_calibItemTableWidget_cellChanged(int row, int column);
 
 private:
     Ui::CalibForm *ui;
     QVector<CalibStruct> fCalibList;
     bool fCalibRunning=false;
     float fCurrBias=0.;
-    QVector<QPointF> fPoints1, fPoints2;
+    QVector<QPointF> fPoints1, fPoints2, fPoints3;
     double fSlope1=0.,fOffs1=0.;
     double fSlope2=0.,fOffs2=0.;
+    double fLastRSenseHiVoltage = 0.;
+    double fLastRSenseLoVoltage = 0.;
+
 
 
 };
