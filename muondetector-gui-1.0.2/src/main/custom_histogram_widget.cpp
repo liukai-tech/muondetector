@@ -124,7 +124,7 @@ void CustomHistogram::update()
 	//QwtPlot::replot();
 	//return;
 	if (!isEnabled()) return;
-	if (fHistogramMap.empty() || fNrBins<=1) { QwtPlot::replot(); return; } 
+    if (fHistogramMap.empty() || fNrBins<=1) { QwtPlot::replot(); return; }
 	QVector<QwtIntervalSample> intervals;
 	double rangeX=fMaxX-fMinX;
 	double xBinSize = rangeX/(fNrBins-1);
@@ -178,17 +178,17 @@ void CustomHistogram::clear()
 {
 	fHistogramMap.clear();
 	fOverflow=fUnderflow=0;
-	update();
+    update();
 }
 
 void CustomHistogram::setStatusEnabled(bool status){
     if (status==true){
-        //fBarChart->attach(this);
+        fBarChart->attach(this);
         setTitle(title);
         update();
     }else{
-        //fBarChart->detach();
-//        setTitle("");
+        fBarChart->detach();
+        setTitle("");
         update();
     }
 }

@@ -27,6 +27,7 @@ public:
 signals:
     void sendSetUbxMsgRateChanges(QMap<uint16_t, int> ubxMsgRateChanges);
     void sendRequestUbxMsgRates();
+    void sendUbxReset();
 
 public slots:
 	void addUbxMsgRates(QMap<uint16_t, int> ubxMsgRates);
@@ -39,6 +40,8 @@ private slots:
 
     void onSettingsButtonBoxClicked(QAbstractButton *button);
 
+    void on_ubxResetPushButton_clicked();
+    
 private:
     Ui::Settings *settingsUi;
     QMap<uint16_t, int> oldSettings;

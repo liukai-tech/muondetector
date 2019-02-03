@@ -59,6 +59,7 @@ public slots:
     void receivedGpioRisingEdge(quint8 pin);
     void sendRequestUbxMsgRates();
     void sendSetUbxMsgRateChanges(QMap<uint16_t, int> changes);
+    void onSendUbxReset();
 	void makeConnection(QString ipAddress, quint16 port);
 
 private slots:

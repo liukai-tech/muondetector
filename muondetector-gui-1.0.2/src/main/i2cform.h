@@ -29,6 +29,7 @@ signals:
 
 public slots:
 	void onI2cStatsReceived(quint32 bytesRead, quint32 bytesWritten, const QVector<I2cDeviceEntry>& deviceList);
+    void onUiEnabledStateChange(bool connected);
 
 private slots:
     void on_statsQueryPushButton_clicked();

@@ -138,19 +138,21 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::setUiEnabledStates, settings, &Settings::onUiEnabledStateChange);
     connect(this, &MainWindow::txBufReceived, settings, &Settings::onTxBufReceived);
     connect(this, &MainWindow::txBufPeakReceived, settings, &Settings::onTxBufPeakReceived);
+    connect(this, &MainWindow::addUbxMsgRates, settings, &Settings::addUbxMsgRates);
+    connect(settings, &Settings::sendRequestUbxMsgRates, this, &MainWindow::sendRequestUbxMsgRates);
+    connect(settings, &Settings::sendSetUbxMsgRateChanges, this, &MainWindow::sendSetUbxMsgRateChanges);
+    connect(settings, &Settings::sendUbxReset, this, &MainWindow::onSendUbxReset);
+
     ui->tabWidget->addTab(settings,"settings");
 
     Map *map = new Map(this);
     ui->tabWidget->addTab(map, "map");
     connect(this, &MainWindow::geodeticPos, map, &Map::onGeodeticPosReceived);
-    connect(this, &MainWindow::addUbxMsgRates, settings, &Settings::addUbxMsgRates);
-    connect(settings, &Settings::sendRequestUbxMsgRates, this, &MainWindow::sendRequestUbxMsgRates);
-    connect(settings, &Settings::sendSetUbxMsgRateChanges, this, &MainWindow::sendSetUbxMsgRateChanges);
 
 
 
     I2cForm *i2cTab = new I2cForm(this);
-//    connect(this, &MainWindow::setUiEnabledStates, settings, &Settings::onUiEnabledStateChange);
+    connect(this, &MainWindow::setUiEnabledStates, i2cTab, &I2cForm::onUiEnabledStateChange);
     connect(this, &MainWindow::i2cStatsReceived, i2cTab, &I2cForm::onI2cStatsReceived);
     connect(i2cTab, &I2cForm::i2cStatsRequest, this, [this]() { this->sendRequest(i2cStatsRequestSig); } );
     connect(i2cTab, &I2cForm::scanI2cBusRequest, this, [this]() { this->sendRequest(i2cScanBusRequestSig); } );
@@ -158,7 +160,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabWidget->addTab(i2cTab,"I2C bus");
 
     calib = new CalibForm(this);
-//    connect(this, &MainWindow::setUiEnabledStates, settings, &Settings::onUiEnabledStateChange);
+    connect(this, &MainWindow::setUiEnabledStates, calib, &CalibForm::onUiEnabledStateChange);
     connect(this, &MainWindow::calibReceived, calib, &CalibForm::onCalibReceived);
     connect(calib, &CalibForm::calibRequest, this, [this]() { this->sendRequest(calibRequestSig); } );
     connect(calib, &CalibForm::writeCalibToEeprom, this, [this]() { this->sendRequest(calibWriteEepromSig); } );
@@ -572,6 +574,12 @@ void MainWindow::sendSetUbxMsgRateChanges(QMap<uint16_t, int> changes){
     emit sendTcpMessage(tcpMessage);
 }
 
+void MainWindow::onSendUbxReset()
+{
+    TcpMessage tcpMessage(ubxResetSig);
+    emit sendTcpMessage(tcpMessage);
+}
+
 void MainWindow::sendRequestGpioRates(){
     TcpMessage xorRateRequest(gpioRateRequestSig);
     *(xorRateRequest.dStream) << (quint16)5 << (quint8)0;
@@ -698,6 +706,7 @@ void MainWindow::connected() {
     sendRequest(biasRequestSig);
     sendRequest(preampRequestSig,0);
     sendRequest(preampRequestSig,1);
+    sendRequest(gainSwitchRequestSig);
     sendRequest(threshRequestSig);
     sendRequest(dacRequestSig,0);
     sendRequest(dacRequestSig,1);

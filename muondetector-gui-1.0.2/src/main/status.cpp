@@ -134,7 +134,7 @@ void Status::onUiEnabledStateChange(bool connected){
         xorSamples.clear();
 //		updatePulseHeightHistogram();
         statusUi->ratePlot->setStatusEnabled(false);
-		statusUi->pulseHeightHistogram->clear();        
+        statusUi->pulseHeightHistogram->clear();
 		statusUi->pulseHeightHistogram->setStatusEnabled(false);
         this->setDisabled(true);
     }
