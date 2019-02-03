@@ -49,6 +49,7 @@ INCLUDEPATH += . \
 INCLUDEPATH += "$$PWD/../../muondetector-shared-1.0.2/src/"
 
 INCLUDEPATH += /usr/local/qwt-6.1.3/include/
+INCLUDEPATH += /usr/local/include/qwt/
 
 #unix:INCLUDEPATH += /usr/lib/muondetector-shared
 
