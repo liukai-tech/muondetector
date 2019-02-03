@@ -25,6 +25,8 @@ public slots:
     void onGpsVersionReceived(const QString& swString, const QString& hwString, const QString& protString);
     void onGpsFixReceived(quint8 val);
     void onGeodeticPosReceived(GeodeticPos pos);
+    void onUiEnabledStateChange(bool connected);
+
 private:
     Ui::GpsSatsForm *ui;
 };

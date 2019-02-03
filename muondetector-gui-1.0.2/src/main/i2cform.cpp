@@ -55,6 +55,17 @@ void I2cForm::onI2cStatsReceived(quint32 bytesRead, quint32 bytesWritten, const 
 
 }
 
+void I2cForm::onUiEnabledStateChange(bool connected)
+{
+    if (!connected) {
+        ui->nrDevicesLabel->setText("Nr. of devices: ");
+        ui->bytesReadLabel->setText("total bytes read: ");
+        ui->bytesWrittenLabel->setText("total bytes written: ");
+        ui->devicesTableWidget->setRowCount(0);
+    }
+    this->setEnabled(connected);
+}
+
 void I2cForm::on_statsQueryPushButton_clicked()
 {
     emit i2cStatsRequest();

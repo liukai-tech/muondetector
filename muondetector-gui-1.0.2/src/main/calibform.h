@@ -30,6 +30,7 @@ public slots:
     QString getCalibParameter(const QString& name);
     const CalibStruct& getCalibItem(const QString& name);
     bool biasCalibValid();
+    void onUiEnabledStateChange(bool connected);
 
 private slots:
     void on_readCalibPushButton_clicked();

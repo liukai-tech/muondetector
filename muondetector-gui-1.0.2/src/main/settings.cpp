@@ -126,3 +126,10 @@ void Settings::onTxBufPeakReceived(quint8 val)
     settingsUi->txPeakLabel->setText("max: "+QString::number(val)+"%");
 }
 
+
+void Settings::on_ubxResetPushButton_clicked()
+{
+    // reset Ublox device
+    emit sendUbxReset();
+}
+

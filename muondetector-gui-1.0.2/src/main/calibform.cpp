@@ -86,6 +86,16 @@ CalibForm::CalibForm(QWidget *parent) :
     ui->setupUi(this);
     ui->calibItemTableWidget->resizeColumnsToContents();
 
+    ui->biasVoltageCalibPlot->setTitle("bias voltage calibration");
+    ui->biasVoltageCalibPlot->setAxisTitle(QwtPlot::xBottom,"DAC voltage / V");
+    ui->biasVoltageCalibPlot->setAxisTitle(QwtPlot::yLeft,"bias voltage / V");
+    ui->biasCurrentCalibPlot->setTitle("bias current correction");
+    ui->biasCurrentCalibPlot->setAxisTitle(QwtPlot::xBottom,"bias voltage / V");
+    QFont font = ui->biasCurrentCalibPlot->axisTitle(QwtPlot::yLeft).font();
+    font.setPointSize(5);
+    ui->biasCurrentCalibPlot->axisTitle(QwtPlot::yLeft).font().setPointSize(5);
+    ui->biasCurrentCalibPlot->setAxisTitle(QwtPlot::yLeft,"bias current at Rsense / uA");
+
     ui->biasVoltageCalibPlot->addCurve("curve1", Qt::blue);
     ui->biasVoltageCalibPlot->curve("curve1").setStyle(QwtPlotCurve::NoCurve);
     QwtSymbol *sym=new QwtSymbol(QwtSymbol::Rect, QBrush(Qt::blue, Qt::SolidPattern),QPen(Qt::black),QSize(5,5));
@@ -111,6 +121,7 @@ CalibForm::CalibForm(QWidget *parent) :
     ui->biasVoltageCalibPlot->curve("Fit2").setStyle(QwtPlotCurve::Lines);
 
     ui->biasVoltageCalibPlot->replot();
+    ui->biasCurrentCalibPlot->replot();
     ui->transferBiasCoeffsPushButton->setEnabled(false);
 
 }
@@ -404,6 +415,22 @@ bool CalibForm::biasCalibValid()
     int calibFlags = getCalibParameter("CALIB_FLAGS").toUInt();
     if (calibFlags & CalibStruct::CALIBFLAGS_VOLTAGE_COEFFS) return true;
     return false;
+}
+
+void CalibForm::onUiEnabledStateChange(bool connected)
+{
+    //measureBiasCalibGroupBox
+    if (!connected) {
+        ui->calibItemTableWidget->setRowCount(0);
+        fCalibList.clear();
+        ui->eepromValidLabel->setText("EEPROM data: ");
+        ui->calibValidLabel->setText("Calib data: ");
+        ui->idLineEdit->setText("N/A");
+    }
+    ui->measureBiasCalibGroupBox->setEnabled(connected);
+    ui->biasCalibGroupBox->setEnabled(connected);
+    ui->calibItemsGroupBox->setEnabled(connected);
+    ui->currentCalibGroupBox->setEnabled(connected);
 }
 
 

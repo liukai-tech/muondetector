@@ -204,3 +204,8 @@ void GpsSatsForm::onGeodeticPosReceived(GeodeticPos pos){
     str+="/"+QString::number((float)pos.vAcc/1000.,'f',3)+"m";
 */    ui->xyzResLabel->setText(str);
 }
+
+void GpsSatsForm::onUiEnabledStateChange(bool connected)
+{
+    //
+}
