@@ -20,6 +20,7 @@ public:
 public slots:
     void onSatsReceived(const QVector<GnssSatellite>& satlist);
     void onTimeAccReceived(quint32 acc);
+    void onFreqAccReceived(quint32 acc);
     void onIntCounterReceived(quint32 cnt);
     void onGpsMonHWReceived(quint16 noise, quint16 agc, quint8 antStatus, quint8 antPower, quint8 jamInd, quint8 flags);
     void onGpsVersionReceived(const QString& swString, const QString& hwString, const QString& protString);

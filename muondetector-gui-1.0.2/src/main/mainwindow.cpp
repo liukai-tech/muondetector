@@ -142,6 +142,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(settings, &Settings::sendRequestUbxMsgRates, this, &MainWindow::sendRequestUbxMsgRates);
     connect(settings, &Settings::sendSetUbxMsgRateChanges, this, &MainWindow::sendSetUbxMsgRateChanges);
     connect(settings, &Settings::sendUbxReset, this, &MainWindow::onSendUbxReset);
+    connect(settings, &Settings::sendUbxConfigDefault, this, [this](){ this->sendRequest(ubxConfigureDefaultSig); } );
 
     ui->tabWidget->addTab(settings,"settings");
 
@@ -173,6 +174,7 @@ MainWindow::MainWindow(QWidget *parent) :
     GpsSatsForm *satsTab = new GpsSatsForm(this);
     connect(this, &MainWindow::satsReceived, satsTab, &GpsSatsForm::onSatsReceived);
     connect(this, &MainWindow::timeAccReceived, satsTab, &GpsSatsForm::onTimeAccReceived);
+    connect(this, &MainWindow::freqAccReceived, satsTab, &GpsSatsForm::onFreqAccReceived);
     connect(this, &MainWindow::intCounterReceived, satsTab, &GpsSatsForm::onIntCounterReceived);
     connect(this, &MainWindow::gpsMonHWReceived, satsTab, &GpsSatsForm::onGpsMonHWReceived);
     connect(this, &MainWindow::gpsVersionReceived, satsTab, &GpsSatsForm::onGpsVersionReceived);
@@ -465,6 +467,12 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
 	quint32 acc=0;    	
 	*(tcpMessage.dStream) >> acc;
         emit timeAccReceived(acc);
+        return;
+    }
+    if (msgID == gpsFreqAccSig){
+    quint32 acc=0;
+    *(tcpMessage.dStream) >> acc;
+        emit freqAccReceived(acc);
         return;
     }
     if (msgID == gpsIntCounterSig){

@@ -28,6 +28,7 @@ signals:
     void sendSetUbxMsgRateChanges(QMap<uint16_t, int> ubxMsgRateChanges);
     void sendRequestUbxMsgRates();
     void sendUbxReset();
+    void sendUbxConfigDefault();
 
 public slots:
 	void addUbxMsgRates(QMap<uint16_t, int> ubxMsgRates);
