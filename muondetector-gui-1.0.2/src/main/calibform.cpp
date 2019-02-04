@@ -86,15 +86,15 @@ CalibForm::CalibForm(QWidget *parent) :
     ui->setupUi(this);
     ui->calibItemTableWidget->resizeColumnsToContents();
 
-    ui->biasVoltageCalibPlot->setTitle("bias voltage calibration");
+    ui->biasVoltageCalibPlot->setTitle("Ubias calibration");
     ui->biasVoltageCalibPlot->setAxisTitle(QwtPlot::xBottom,"DAC voltage / V");
-    ui->biasVoltageCalibPlot->setAxisTitle(QwtPlot::yLeft,"bias voltage / V");
-    ui->biasCurrentCalibPlot->setTitle("bias current correction");
+    ui->biasVoltageCalibPlot->setAxisTitle(QwtPlot::yLeft,"Ubias / V");
+    ui->biasCurrentCalibPlot->setTitle("Ibias correction");
     ui->biasCurrentCalibPlot->setAxisTitle(QwtPlot::xBottom,"bias voltage / V");
     QFont font = ui->biasCurrentCalibPlot->axisTitle(QwtPlot::yLeft).font();
     font.setPointSize(5);
     ui->biasCurrentCalibPlot->axisTitle(QwtPlot::yLeft).font().setPointSize(5);
-    ui->biasCurrentCalibPlot->setAxisTitle(QwtPlot::yLeft,"bias current at Rsense / uA");
+    ui->biasCurrentCalibPlot->setAxisTitle(QwtPlot::yLeft,"Ibias / uA");
 
     ui->biasVoltageCalibPlot->addCurve("curve1", Qt::blue);
     ui->biasVoltageCalibPlot->curve("curve1").setStyle(QwtPlotCurve::NoCurve);

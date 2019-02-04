@@ -30,7 +30,7 @@ QString printReadableFloat(double value, int prec=2, int lowOrderInhibit=-12, in
     if (fabs(newOrder)>=3.) { fmtChar='g'; }
     else { prec=prec-(int)newOrder - 1;  }
     if (prec<0) prec=0;
-    return QString::number(value,fmtChar,prec)+suffix;
+    return QString::number(value,fmtChar,prec)+" "+suffix;
 }
 
 
@@ -65,6 +65,10 @@ void GpsSatsForm::onSatsReceived(const QVector<GnssSatellite> &satlist)
     satPosPainter.drawEllipse(QPoint(satPosPixmapSize/2,satPosPixmapSize/2),satPosPixmapSize/2,satPosPixmapSize/2);
     satPosPainter.drawLine(QPoint(satPosPixmapSize/2,0),QPoint(satPosPixmapSize/2,satPosPixmapSize));
     satPosPainter.drawLine(QPoint(0,satPosPixmapSize/2),QPoint(satPosPixmapSize,satPosPixmapSize/2));
+    satPosPainter.drawText(satPosPixmapSize/2+2,5,11,11,Qt::AlignHCenter,"N");
+    satPosPainter.drawText(satPosPixmapSize/2+2,satPosPixmapSize-15,11,11,Qt::AlignHCenter,"S");
+    satPosPainter.drawText(5,satPosPixmapSize/2-12,11,11,Qt::AlignHCenter,"W");
+    satPosPainter.drawText(satPosPixmapSize-12,satPosPixmapSize/2-12,11,11,Qt::AlignHCenter,"E");
 
     int nrGoodSats = 0;
     for (auto it=satlist.begin(); it!=satlist.end(); it++)
@@ -84,10 +88,10 @@ void GpsSatsForm::onSatsReceived(const QVector<GnssSatellite> &satlist)
             if (satlist[i].fCnr>40) satPosPainter.setBrush(Qt::darkGreen);
             else if (satlist[i].fCnr>30) satPosPainter.setBrush(Qt::green);
             else if (satlist[i].fCnr>20) satPosPainter.setBrush(Qt::yellow);
-            else if (satlist[i].fCnr>10) satPosPainter.setBrush(QColor(255,127,0));
+            else if (satlist[i].fCnr>10) satPosPainter.setBrush(QColor(255,100,0));
             else if (satlist[i].fCnr>0) satPosPainter.setBrush(Qt::red);
             else satPosPainter.setBrush(QColor("transparent"));
-            satPosPainter.drawEllipse(QPointF(xpos+satPosPixmapSize/2,ypos+satPosPixmapSize/2),2.5,2.5);
+            satPosPainter.drawEllipse(QPointF(xpos+satPosPixmapSize/2,ypos+satPosPixmapSize/2),3.,3.);
         }
     }
     ui->satPosLabel->setPixmap(satPosPixmap);
