@@ -1,28 +1,33 @@
 #include <cmath>
 #include "gpssatsform.h"
 #include "ui_gpssatsform.h"
+#include <QPainter>
+#include <QPixmap>
+
+const static double PI = 3.1415926535;
 
 const QVector<QString> FIX_TYPE_STRINGS = { "No Fix", "Dead Reck." , "2D-Fix", "3D-Fix", "GPS+Dead Reck.", "Time Only"  };
 const QString GNSS_ID_STRING[] = { " GPS","SBAS"," GAL","BEID","IMES","QZSS","GLNS"," N/A" };
 
 // helper function to format human readable numbers with common suffixes (k(ilo), M(ega), m(illi) etc.)
-QString printReadableFloat(double value, int prec=2, int lowOrderInhibit=-9, int highOrderInhibit=9) {
+QString printReadableFloat(double value, int prec=2, int lowOrderInhibit=-12, int highOrderInhibit=9) {
     QString str="";
     QString suffix="";
     double order=std::log10(std::fabs(value));
     if (order>=lowOrderInhibit && order<=highOrderInhibit) {
-    if (order>9) { value*=1e-9; suffix="G"; }
-    else if (order>6) { value*=1e-6; suffix="M"; }
-    else if (order>3) { value*=1e-3; suffix="k"; }
-    else if (order>0) { suffix=""; }
+    if (order>=9) { value*=1e-9; suffix="G"; }
+    else if (order>=6) { value*=1e-6; suffix="M"; }
+    else if (order>=3) { value*=1e-3; suffix="k"; }
+    else if (order>=0) { suffix=""; }
     //else if (order>-2) { value*=100.; suffix="c"; }
-    else if (order>-3) { value*=1000.; suffix="m"; }
-    else if (order>-6) { value*=1e6; suffix="u"; }
-    else if (order>-9) { value*=1e9; suffix="n"; }
+    else if (order>=-3) { value*=1000.; suffix="m"; }
+    else if (order>=-6) { value*=1e6; suffix="u"; }
+    else if (order>=-9) { value*=1e9; suffix="n"; }
+    else if (order>=-12) { value*=1e12; suffix="p"; }
     }
     char fmtChar='f';
     double newOrder = std::log10(std::fabs(value));
-    if (fabs(newOrder)>3.) { fmtChar='g'; }
+    if (fabs(newOrder)>=3.) { fmtChar='g'; }
     else { prec=prec-(int)newOrder - 1;  }
     if (prec<0) prec=0;
     return QString::number(value,fmtChar,prec)+suffix;
@@ -48,19 +53,44 @@ void GpsSatsForm::onSatsReceived(const QVector<GnssSatellite> &satlist)
     QVector<GnssSatellite> newlist;
     QString str;
     QColor color;
+    const int iqPixmapSize=105;
+    const int satPosPixmapSize=180;
+    QPixmap satPosPixmap(satPosPixmapSize,satPosPixmapSize);
+    //    pixmap.fill(QColor("transparent"));
+    satPosPixmap.fill(Qt::white);
+    QPainter satPosPainter(&satPosPixmap);
+    satPosPainter.setPen(QPen(Qt::black));
+    satPosPainter.drawEllipse(QPoint(satPosPixmapSize/2,satPosPixmapSize/2),satPosPixmapSize/6,satPosPixmapSize/6);
+    satPosPainter.drawEllipse(QPoint(satPosPixmapSize/2,satPosPixmapSize/2),satPosPixmapSize/3,satPosPixmapSize/3);
+    satPosPainter.drawEllipse(QPoint(satPosPixmapSize/2,satPosPixmapSize/2),satPosPixmapSize/2,satPosPixmapSize/2);
+    satPosPainter.drawLine(QPoint(satPosPixmapSize/2,0),QPoint(satPosPixmapSize/2,satPosPixmapSize));
+    satPosPainter.drawLine(QPoint(0,satPosPixmapSize/2),QPoint(satPosPixmapSize,satPosPixmapSize/2));
 
     int nrGoodSats = 0;
     for (auto it=satlist.begin(); it!=satlist.end(); it++)
         if (it->fCnr>0) nrGoodSats++;
 
-    ui->nrSatsLabel->setText(QString::number(nrGoodSats));
+    ui->nrSatsLabel->setText(QString::number(nrGoodSats)+"/"+QString::number(satlist.size()));
 
     for (int i=0; i<satlist.size(); i++)
     {
         if (ui->visibleSatsCheckBox->isChecked()) {
             if (satlist[i].fCnr>0) newlist.push_back(satlist[i]);
         } else newlist.push_back(satlist[i]);
+        if (satlist[i].fElev<=90. && satlist[i].fElev>=-90.) {
+            double magn=(90.-satlist[i].fElev)*satPosPixmapSize/180.;
+            double xpos = magn*sin(PI*satlist[i].fAzim/180.);
+            double ypos = -magn*cos(PI*satlist[i].fAzim/180.);
+            if (satlist[i].fCnr>40) satPosPainter.setBrush(Qt::darkGreen);
+            else if (satlist[i].fCnr>30) satPosPainter.setBrush(Qt::green);
+            else if (satlist[i].fCnr>20) satPosPainter.setBrush(Qt::yellow);
+            else if (satlist[i].fCnr>10) satPosPainter.setBrush(QColor(255,127,0));
+            else if (satlist[i].fCnr>0) satPosPainter.setBrush(Qt::red);
+            else satPosPainter.setBrush(QColor("transparent"));
+            satPosPainter.drawEllipse(QPointF(xpos+satPosPixmapSize/2,ypos+satPosPixmapSize/2),2.5,2.5);
+        }
     }
+    ui->satPosLabel->setPixmap(satPosPixmap);
 
     int N=newlist.size();
     ui->satsTableWidget->setRowCount(N);
@@ -137,7 +167,13 @@ void GpsSatsForm::onTimeAccReceived(quint32 acc)
 {
     double tAcc=acc*1e-9;
     ui->timePrecisionLabel->setText(printReadableFloat(tAcc)+"s");
-//    ui->timePrecisionLabel->setText(QString::number(acc)+" ns");
+    //    ui->timePrecisionLabel->setText(QString::number(acc)+" ns");
+}
+
+void GpsSatsForm::onFreqAccReceived(quint32 acc)
+{
+    double fAcc=acc*1e-12;
+    ui->freqPrecisionLabel->setText(printReadableFloat(fAcc)+"s/s");
 }
 
 void GpsSatsForm::onIntCounterReceived(quint32 cnt)

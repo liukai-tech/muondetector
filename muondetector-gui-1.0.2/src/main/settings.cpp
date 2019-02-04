@@ -99,6 +99,7 @@ void Settings::onSettingsButtonBoxClicked(QAbstractButton *button){
     }
     if (button == settingsUi->settingsButtonBox->button(QDialogButtonBox::RestoreDefaults)){
         //settingsUi->ubloxSignalStates->blockSignals(true);
+        emit sendUbxConfigDefault();
 
     }
 }
