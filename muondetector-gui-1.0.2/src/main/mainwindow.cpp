@@ -172,6 +172,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     GpsSatsForm *satsTab = new GpsSatsForm(this);
+    connect(this, &MainWindow::setUiEnabledStates, satsTab, &GpsSatsForm::onUiEnabledStateChange);
     connect(this, &MainWindow::satsReceived, satsTab, &GpsSatsForm::onSatsReceived);
     connect(this, &MainWindow::timeAccReceived, satsTab, &GpsSatsForm::onTimeAccReceived);
     connect(this, &MainWindow::freqAccReceived, satsTab, &GpsSatsForm::onFreqAccReceived);

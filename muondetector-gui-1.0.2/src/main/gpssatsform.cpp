@@ -82,15 +82,31 @@ void GpsSatsForm::onSatsReceived(const QVector<GnssSatellite> &satlist)
             if (satlist[i].fCnr>0) newlist.push_back(satlist[i]);
         } else newlist.push_back(satlist[i]);
         if (satlist[i].fElev<=90. && satlist[i].fElev>=-90.) {
+            if (ui->visibleSatsCheckBox->isChecked() && satlist[i].fCnr==0) continue;
             double magn=(90.-satlist[i].fElev)*satPosPixmapSize/180.;
             double xpos = magn*sin(PI*satlist[i].fAzim/180.);
             double ypos = -magn*cos(PI*satlist[i].fAzim/180.);
+            QColor satColor=Qt::white;
+            if (satlist[i].fGnssId==0) satColor=QColor(Qt::darkGreen); // GPS
+            else if (satlist[i].fGnssId==1) satColor=QColor(Qt::darkYellow); // SBAS
+            else if (satlist[i].fGnssId==2) satColor=QColor(Qt::blue);  // GAL
+            else if (satlist[i].fGnssId==3) satColor=QColor(Qt::magenta); // BEID
+            else if (satlist[i].fGnssId==4) satColor=QColor(Qt::gray); // IMES
+            else if (satlist[i].fGnssId==5) satColor=QColor(Qt::cyan); // QZSS
+            else if (satlist[i].fGnssId==6) satColor=QColor(Qt::red); // GLNS
+            satPosPainter.setPen(satColor);
+            int alpha = satlist[i].fCnr*255/40;
+            if (alpha>255) alpha=255;
+            satColor.setAlpha(alpha);
+            satPosPainter.setBrush(satColor);
+/*
             if (satlist[i].fCnr>40) satPosPainter.setBrush(Qt::darkGreen);
             else if (satlist[i].fCnr>30) satPosPainter.setBrush(Qt::green);
             else if (satlist[i].fCnr>20) satPosPainter.setBrush(Qt::yellow);
             else if (satlist[i].fCnr>10) satPosPainter.setBrush(QColor(255,100,0));
             else if (satlist[i].fCnr>0) satPosPainter.setBrush(Qt::red);
             else satPosPainter.setBrush(QColor("transparent"));
+*/
             satPosPainter.drawEllipse(QPointF(xpos+satPosPixmapSize/2,ypos+satPosPixmapSize/2),3.,3.);
         }
     }
@@ -242,10 +258,31 @@ void GpsSatsForm::onGeodeticPosReceived(GeodeticPos pos){
     str=printReadableFloat(pos.hAcc/1000.,2,0)+"m/"+printReadableFloat(pos.vAcc/1000.,2,0)+"m";
 /*    str=QString::number((float)pos.hAcc/1000.,'f',3)+"m";
     str+="/"+QString::number((float)pos.vAcc/1000.,'f',3)+"m";
-*/    ui->xyzResLabel->setText(str);
+*/
+    ui->xyzResLabel->setText(str);
 }
 
 void GpsSatsForm::onUiEnabledStateChange(bool connected)
 {
     //
+    if (!connected) {
+        QVector<GnssSatellite> emptylist;
+        onSatsReceived(emptylist);
+        ui->timePrecisionLabel->setText("N/A");
+        ui->freqPrecisionLabel->setText("N/A");
+        ui->intCounterLabel->setText("N/A");
+        ui->lnaNoiseLabel->setText("N/A");
+        ui->lnaAgcLabel->setText("N/A");
+        ui->antStatusLabel->setText("N/A");
+        ui->antPowerLabel->setText("N/A");
+        ui->fixTypeLabel->setText("N/A");
+        ui->xyzResLabel->setText("N/A");
+        ui->ubxHwVersionLabel->setText("N/A");
+        ui->ubxSwVersionLabel->setText("N/A");
+        ui->UBXprotLabel->setText("N/A");
+        //ui->satsTableWidget->setRowCount(0);
+    }
+    ui->jammingProgressBar->setEnabled(connected);
+    this->setEnabled(connected);
+
 }
