@@ -178,6 +178,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::freqAccReceived, satsTab, &GpsSatsForm::onFreqAccReceived);
     connect(this, &MainWindow::intCounterReceived, satsTab, &GpsSatsForm::onIntCounterReceived);
     connect(this, &MainWindow::gpsMonHWReceived, satsTab, &GpsSatsForm::onGpsMonHWReceived);
+    connect(this, &MainWindow::gpsMonHW2Received, satsTab, &GpsSatsForm::onGpsMonHW2Received);
     connect(this, &MainWindow::gpsVersionReceived, satsTab, &GpsSatsForm::onGpsVersionReceived);
     connect(this, &MainWindow::gpsFixReceived, satsTab, &GpsSatsForm::onGpsFixReceived);
     connect(this, &MainWindow::geodeticPos, satsTab, &GpsSatsForm::onGeodeticPosReceived);
@@ -503,6 +504,14 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
 	quint8 flags=0;
 	*(tcpMessage.dStream) >> noise >> agc >> antStatus >> antPower >> jamInd >> flags;
         emit gpsMonHWReceived(noise,agc,antStatus,antPower,jamInd,flags);
+        return;
+    }
+    if (msgID == gpsMonHW2Sig){
+        qint8 ofsI=0, ofsQ=0;
+        quint8 magI=0, magQ=0;
+        quint8 cfgSrc=0;
+        *(tcpMessage.dStream) >> ofsI >> magI >> ofsQ >> magQ >> cfgSrc;
+        emit gpsMonHW2Received(ofsI, magI, ofsQ, magQ, cfgSrc);
         return;
     }
     if (msgID == gpsVersionSig){

@@ -108,6 +108,7 @@ void GpsSatsForm::onSatsReceived(const QVector<GnssSatellite> &satlist)
             else satPosPainter.setBrush(QColor("transparent"));
 */
             satPosPainter.drawEllipse(QPointF(xpos+satPosPixmapSize/2,ypos+satPosPixmapSize/2),3.,3.);
+            if (satlist[i].fUsed) satPosPainter.drawEllipse(QPointF(xpos+satPosPixmapSize/2,ypos+satPosPixmapSize/2),3.5,3.5);
         }
     }
     ui->satPosLabel->setPixmap(satPosPixmap);
@@ -236,6 +237,25 @@ void GpsSatsForm::onGpsMonHWReceived(quint16 noise, quint16 agc, quint8 antStatu
     }
     ui->antPowerLabel->setText(str);
     ui->jammingProgressBar->setValue(jamInd/2.55);
+}
+
+void GpsSatsForm::onGpsMonHW2Received(qint8 ofsI, quint8 magI, qint8 ofsQ, quint8 magQ, quint8 cfgSrc)
+{
+    const int iqPixmapSize=65;
+    QPixmap iqPixmap(iqPixmapSize,iqPixmapSize);
+    //    pixmap.fill(QColor("transparent"));
+    iqPixmap.fill(Qt::white);
+    QPainter iqPainter(&iqPixmap);
+    iqPainter.setPen(QPen(Qt::black));
+    iqPainter.drawLine(QPoint(iqPixmapSize/2,0),QPoint(iqPixmapSize/2,iqPixmapSize));
+    iqPainter.drawLine(QPoint(0,iqPixmapSize/2),QPoint(iqPixmapSize,iqPixmapSize/2));
+    double x=0., y=0.;
+    x=ofsI*iqPixmapSize/(2*127)+iqPixmapSize/2.;
+    y=ofsQ*iqPixmapSize/(2*127)+iqPixmapSize/2.;
+    iqPainter.setPen(Qt::blue);
+    iqPainter.setBrush(Qt::blue);
+    iqPainter.drawEllipse(QPointF(x,y),3.,3.);
+    ui->iqAlignmentLabel->setPixmap(iqPixmap);
 }
 
 void GpsSatsForm::onGpsVersionReceived(const QString &swString, const QString &hwString, const QString& protString)

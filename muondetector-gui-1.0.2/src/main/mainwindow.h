@@ -52,7 +52,8 @@ signals:
 	void txBufReceived(quint8 val);
 	void txBufPeakReceived(quint8 val);
 	void gpsMonHWReceived(quint16 noise, quint16 agc, quint8 antStatus, quint8 antPower, quint8 jamInd, quint8 flags);
-	void gpsVersionReceived(const QString& swString, const QString& hwString, const QString& protString);
+    void gpsMonHW2Received(qint8 ofsI, quint8 magI, qint8 ofsQ, quint8 magQ, quint8 cfgSrc);
+    void gpsVersionReceived(const QString& swString, const QString& hwString, const QString& protString);
 	void gpsFixReceived(quint8 val);
 	
 public slots:
