@@ -4,6 +4,8 @@
 #include <QPainter>
 #include <QPixmap>
 
+const int MAX_IQTRACK_BUFFER = 250;
+
 const static double PI = 3.1415926535;
 
 const QVector<QString> FIX_TYPE_STRINGS = { "No Fix", "Dead Reck." , "2D-Fix", "3D-Fix", "GPS+Dead Reck.", "Time Only"  };
@@ -249,13 +251,20 @@ void GpsSatsForm::onGpsMonHW2Received(qint8 ofsI, quint8 magI, qint8 ofsQ, quint
     iqPainter.setPen(QPen(Qt::black));
     iqPainter.drawLine(QPoint(iqPixmapSize/2,0),QPoint(iqPixmapSize/2,iqPixmapSize));
     iqPainter.drawLine(QPoint(0,iqPixmapSize/2),QPoint(iqPixmapSize,iqPixmapSize/2));
+    QColor col(Qt::blue);
+    iqPainter.setPen(col);
     double x=0., y=0.;
+    for (int i=0; i<iqTrack.size();i++) {
+        iqPainter.drawPoint(iqTrack[i]);
+    }
     x=ofsI*iqPixmapSize/(2*127)+iqPixmapSize/2.;
-    y=ofsQ*iqPixmapSize/(2*127)+iqPixmapSize/2.;
-    iqPainter.setPen(Qt::blue);
-    iqPainter.setBrush(Qt::blue);
-    iqPainter.drawEllipse(QPointF(x,y),3.,3.);
+    y=-ofsQ*iqPixmapSize/(2*127)+iqPixmapSize/2.;
+    col.setAlpha(100);
+    iqPainter.setBrush(col);
+    iqPainter.drawEllipse(QPointF(x,y),magI*iqPixmapSize/512.,magQ*iqPixmapSize/512.);
     ui->iqAlignmentLabel->setPixmap(iqPixmap);
+    iqTrack.push_back(QPointF(x,y));
+    if (iqTrack.size()>MAX_IQTRACK_BUFFER) iqTrack.pop_front();
 }
 
 void GpsSatsForm::onGpsVersionReceived(const QString &swString, const QString &hwString, const QString& protString)
@@ -288,6 +297,7 @@ void GpsSatsForm::onUiEnabledStateChange(bool connected)
     if (!connected) {
         QVector<GnssSatellite> emptylist;
         onSatsReceived(emptylist);
+        iqTrack.clear();
         ui->timePrecisionLabel->setText("N/A");
         ui->freqPrecisionLabel->setText("N/A");
         ui->intCounterLabel->setText("N/A");

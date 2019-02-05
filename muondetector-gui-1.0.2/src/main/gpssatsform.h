@@ -31,6 +31,7 @@ public slots:
 
 private:
     Ui::GpsSatsForm *ui;
+    QVector<QPointF> iqTrack;
 };
 
 #endif // GPSSATSFORM_H
