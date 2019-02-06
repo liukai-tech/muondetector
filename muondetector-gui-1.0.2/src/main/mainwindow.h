@@ -13,6 +13,7 @@
 
 struct I2cDeviceEntry;
 struct CalibStruct;
+struct GnssConfigStruct;
 class GnssSatellite;
 class CalibForm;
 
@@ -46,6 +47,7 @@ signals:
 	void i2cStatsReceived(quint32 bytesRead, quint32 bytesWritten, const QVector<I2cDeviceEntry>& deviceList);
 	void calibReceived(bool valid, bool eepromValid, quint64 id, const QVector<CalibStruct>& calibList);
 	void satsReceived(const QVector<GnssSatellite>& satList);
+    void gnssConfigsReceived(quint8 numTrkCh, const QVector<GnssConfigStruct>& configList);
 	void timeAccReceived(quint32 acc);
     void freqAccReceived(quint32 acc);
     void intCounterReceived(quint32 cnt);
@@ -102,6 +104,7 @@ private slots:
     void onCalibUpdated(const QVector<CalibStruct>& items);
 
     void on_biasControlTypeComboBox_currentIndexChanged(int index);
+    void onSetGnssConfigs(const QVector<GnssConfigStruct>& configList);
 
 private:
 	Ui::MainWindow *ui;

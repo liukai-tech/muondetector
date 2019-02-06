@@ -113,6 +113,14 @@ void Settings::onUiEnabledStateChange(bool connected){
         settingsUi->ubloxSignalStates->clearContents();
         settingsUi->ubloxSignalStates->setRowCount(0);
         settingsUi->ubloxSignalStates->blockSignals(true);
+        settingsUi->gnssGpsCheckBox->setEnabled(false);
+        settingsUi->gnssSbasCheckBox->setEnabled(false);
+        settingsUi->gnssGalCheckBox->setEnabled(false);
+        settingsUi->gnssBeidCheckBox->setEnabled(false);
+        settingsUi->gnssQzssCheckBox->setEnabled(false);
+        settingsUi->gnssGlnsCheckBox->setEnabled(false);
+        settingsUi->gnssImesCheckBox->setEnabled(false);
+        settingsUi->numTrkChannelsLabel->setText("N/A");
         this->setDisabled(true);
     }
 }
@@ -127,6 +135,36 @@ void Settings::onTxBufPeakReceived(quint8 val)
     settingsUi->txPeakLabel->setText("max: "+QString::number(val)+"%");
 }
 
+//const QString GNSS_ID_STRING[] = { " GPS","SBAS"," GAL","BEID","IMES","QZSS","GLNS"," N/A" };
+void Settings::onGnssConfigsReceived(quint8 numTrkCh, const QVector<GnssConfigStruct> &configList)
+{
+    settingsUi->numTrkChannelsLabel->setText(QString::number(numTrkCh));
+    for (int i=0; i<configList.size(); i++) {
+        if (configList[i].gnssId==0) { // GPS
+            settingsUi->gnssGpsCheckBox->setEnabled(true);
+            settingsUi->gnssGpsCheckBox->setChecked(configList[i].flags & 0x01);
+        } else if (configList[i].gnssId==1) { // SBAS
+            settingsUi->gnssSbasCheckBox->setEnabled(true);
+            settingsUi->gnssSbasCheckBox->setChecked(configList[i].flags & 0x01);
+        } else if (configList[i].gnssId==2) { // GAL
+            settingsUi->gnssGalCheckBox->setEnabled(true);
+            settingsUi->gnssGalCheckBox->setChecked(configList[i].flags & 0x01);
+        } else if (configList[i].gnssId==3) { // BEID
+            settingsUi->gnssBeidCheckBox->setEnabled(true);
+            settingsUi->gnssBeidCheckBox->setChecked(configList[i].flags & 0x01);
+        } else if (configList[i].gnssId==4) { // IMES
+            settingsUi->gnssImesCheckBox->setEnabled(true);
+            settingsUi->gnssImesCheckBox->setChecked(configList[i].flags & 0x01);
+        } else if (configList[i].gnssId==5) { // QZSS
+            settingsUi->gnssQzssCheckBox->setEnabled(true);
+            settingsUi->gnssQzssCheckBox->setChecked(configList[i].flags & 0x01);
+        } else if (configList[i].gnssId==6) { // GLNS
+            settingsUi->gnssGlnsCheckBox->setEnabled(true);
+            settingsUi->gnssGlnsCheckBox->setChecked(configList[i].flags & 0x01);
+        }
+    }
+}
+
 
 void Settings::on_ubxResetPushButton_clicked()
 {
@@ -134,3 +172,51 @@ void Settings::on_ubxResetPushButton_clicked()
     emit sendUbxReset();
 }
 
+
+void Settings::on_setGnssConfigPushButton_clicked()
+{
+    QVector<GnssConfigStruct> configList;
+    if (settingsUi->gnssGpsCheckBox->isEnabled()) { // GPS
+       GnssConfigStruct config;
+       config.gnssId=0; config.maxTrkCh=20; config.resTrkCh=8;
+       config.flags = (settingsUi->gnssGpsCheckBox->isChecked())?0x00000001:0;
+       configList.push_back(config);
+    }
+    if (settingsUi->gnssSbasCheckBox->isEnabled()) { // SBAS
+       GnssConfigStruct config;
+       config.gnssId=1; config.maxTrkCh=4; config.resTrkCh=2;
+       config.flags = (settingsUi->gnssSbasCheckBox->isChecked())?0x00000001:0;
+       configList.push_back(config);
+    }
+    if (settingsUi->gnssGalCheckBox->isEnabled()) { // GAL
+       GnssConfigStruct config;
+       config.gnssId=2; config.maxTrkCh=8; config.resTrkCh=4;
+       config.flags = (settingsUi->gnssGalCheckBox->isChecked())?0x00000001:0;
+       configList.push_back(config);
+    }
+    if (settingsUi->gnssBeidCheckBox->isEnabled()) { // BEID
+       GnssConfigStruct config;
+       config.gnssId=3; config.maxTrkCh=8; config.resTrkCh=4;
+       config.flags = (settingsUi->gnssBeidCheckBox->isChecked())?0x00000001:0;
+       configList.push_back(config);
+    }
+    if (settingsUi->gnssImesCheckBox->isEnabled()) { // IMES
+       GnssConfigStruct config;
+       config.gnssId=4; config.maxTrkCh=4; config.resTrkCh=1;
+       config.flags = (settingsUi->gnssImesCheckBox->isChecked())?0x00000001:0;
+       configList.push_back(config);
+    }
+    if (settingsUi->gnssQzssCheckBox->isEnabled()) { // QZSS
+       GnssConfigStruct config;
+       config.gnssId=5; config.maxTrkCh=4; config.resTrkCh=2;
+       config.flags = (settingsUi->gnssQzssCheckBox->isChecked())?0x00000001:0;
+       configList.push_back(config);
+    }
+    if (settingsUi->gnssGlnsCheckBox->isEnabled()) { // GLNS
+       GnssConfigStruct config;
+       config.gnssId=6; config.maxTrkCh=8; config.resTrkCh=4;
+       config.flags = (settingsUi->gnssGlnsCheckBox->isChecked())?0x00000001:0;
+       configList.push_back(config);
+    }
+    if (configList.size()) emit setGnssConfigs(configList);
+}

@@ -143,6 +143,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(settings, &Settings::sendSetUbxMsgRateChanges, this, &MainWindow::sendSetUbxMsgRateChanges);
     connect(settings, &Settings::sendUbxReset, this, &MainWindow::onSendUbxReset);
     connect(settings, &Settings::sendUbxConfigDefault, this, [this](){ this->sendRequest(ubxConfigureDefaultSig); } );
+    connect(this, &MainWindow::gnssConfigsReceived, settings, &Settings::onGnssConfigsReceived);
+    connect(settings, &Settings::setGnssConfigs, this, &MainWindow::onSetGnssConfigs);
 
     ui->tabWidget->addTab(settings,"settings");
 
@@ -465,6 +467,23 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
         emit satsReceived(satList);
         return;
     }
+    if (msgID == gnssConfigSig){
+        int numTrkCh=0;
+        int nrConfigs=0;
+
+        *(tcpMessage.dStream) >> numTrkCh >> nrConfigs;
+
+        QVector<GnssConfigStruct> configList;
+        for (int i=0; i<nrConfigs; i++)
+        {
+            GnssConfigStruct config;
+            *(tcpMessage.dStream) >> config.gnssId >> config.resTrkCh >>
+                config.maxTrkCh >> config.flags;
+            configList.push_back(config);
+        }
+        emit gnssConfigsReceived(numTrkCh, configList);
+        return;
+    }
     if (msgID == gpsTimeAccSig){
 	quint32 acc=0;    	
 	*(tcpMessage.dStream) >> acc;
@@ -595,6 +614,17 @@ void MainWindow::sendSetUbxMsgRateChanges(QMap<uint16_t, int> changes){
 void MainWindow::onSendUbxReset()
 {
     TcpMessage tcpMessage(ubxResetSig);
+    emit sendTcpMessage(tcpMessage);
+}
+
+void MainWindow::onSetGnssConfigs(const QVector<GnssConfigStruct>& configList){
+    TcpMessage tcpMessage(gnssConfigSig);
+    int N=configList.size();
+    *(tcpMessage.dStream) << (int)N;
+    for (int i=0; i<N; i++){
+        *(tcpMessage.dStream) << configList[i].gnssId<<configList[i].resTrkCh
+                              << configList[i].maxTrkCh<<configList[i].flags;
+    }
     emit sendTcpMessage(tcpMessage);
 }
 

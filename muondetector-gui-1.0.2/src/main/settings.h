@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QTableWidget>
 #include <QtWidgets>
+#include <gnsssatellite.h>
+
 
 class UbxMsgRateTableItem : public QTableWidgetItem
 {
@@ -29,6 +31,8 @@ signals:
     void sendRequestUbxMsgRates();
     void sendUbxReset();
     void sendUbxConfigDefault();
+    void setGnssConfigs(const QVector<GnssConfigStruct>& configList);
+
 
 public slots:
 	void addUbxMsgRates(QMap<uint16_t, int> ubxMsgRates);
@@ -36,6 +40,7 @@ public slots:
     void onUiEnabledStateChange(bool connected);
     void onTxBufReceived(quint8 val);
     void onTxBufPeakReceived(quint8 val);
+    void onGnssConfigsReceived(quint8 numTrkCh, const QVector<GnssConfigStruct>& configList);
 
 private slots:
 
@@ -43,6 +48,8 @@ private slots:
 
     void on_ubxResetPushButton_clicked();
     
+    void on_setGnssConfigPushButton_clicked();
+
 private:
     Ui::Settings *settingsUi;
     QMap<uint16_t, int> oldSettings;

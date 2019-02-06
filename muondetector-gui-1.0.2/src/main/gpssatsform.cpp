@@ -293,10 +293,10 @@ void GpsSatsForm::onGeodeticPosReceived(GeodeticPos pos){
 
 void GpsSatsForm::onUiEnabledStateChange(bool connected)
 {
-    //
     if (!connected) {
         QVector<GnssSatellite> emptylist;
         onSatsReceived(emptylist);
+        onGpsMonHW2Received(0,0,0,0,0);
         iqTrack.clear();
         ui->timePrecisionLabel->setText("N/A");
         ui->freqPrecisionLabel->setText("N/A");
