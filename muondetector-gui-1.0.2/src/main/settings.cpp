@@ -178,13 +178,13 @@ void Settings::on_setGnssConfigPushButton_clicked()
     QVector<GnssConfigStruct> configList;
     if (settingsUi->gnssGpsCheckBox->isEnabled()) { // GPS
        GnssConfigStruct config;
-       config.gnssId=0; config.maxTrkCh=20; config.resTrkCh=8;
+       config.gnssId=0; config.maxTrkCh=14; config.resTrkCh=8;
        config.flags = (settingsUi->gnssGpsCheckBox->isChecked())?0x00000001:0;
        configList.push_back(config);
     }
     if (settingsUi->gnssSbasCheckBox->isEnabled()) { // SBAS
        GnssConfigStruct config;
-       config.gnssId=1; config.maxTrkCh=4; config.resTrkCh=2;
+       config.gnssId=1; config.maxTrkCh=3; config.resTrkCh=1;
        config.flags = (settingsUi->gnssSbasCheckBox->isChecked())?0x00000001:0;
        configList.push_back(config);
     }
@@ -196,25 +196,25 @@ void Settings::on_setGnssConfigPushButton_clicked()
     }
     if (settingsUi->gnssBeidCheckBox->isEnabled()) { // BEID
        GnssConfigStruct config;
-       config.gnssId=3; config.maxTrkCh=8; config.resTrkCh=4;
+       config.gnssId=3; config.maxTrkCh=10; config.resTrkCh=4;
        config.flags = (settingsUi->gnssBeidCheckBox->isChecked())?0x00000001:0;
        configList.push_back(config);
     }
     if (settingsUi->gnssImesCheckBox->isEnabled()) { // IMES
        GnssConfigStruct config;
-       config.gnssId=4; config.maxTrkCh=4; config.resTrkCh=1;
+       config.gnssId=4; config.maxTrkCh=8; config.resTrkCh=0;
        config.flags = (settingsUi->gnssImesCheckBox->isChecked())?0x00000001:0;
        configList.push_back(config);
     }
     if (settingsUi->gnssQzssCheckBox->isEnabled()) { // QZSS
        GnssConfigStruct config;
-       config.gnssId=5; config.maxTrkCh=4; config.resTrkCh=2;
+       config.gnssId=5; config.maxTrkCh=3; config.resTrkCh=0;
        config.flags = (settingsUi->gnssQzssCheckBox->isChecked())?0x00000001:0;
        configList.push_back(config);
     }
     if (settingsUi->gnssGlnsCheckBox->isEnabled()) { // GLNS
        GnssConfigStruct config;
-       config.gnssId=6; config.maxTrkCh=8; config.resTrkCh=4;
+       config.gnssId=6; config.maxTrkCh=12; config.resTrkCh=6;
        config.flags = (settingsUi->gnssGlnsCheckBox->isChecked())?0x00000001:0;
        configList.push_back(config);
     }
