@@ -114,12 +114,19 @@ void Settings::onUiEnabledStateChange(bool connected){
         settingsUi->ubloxSignalStates->setRowCount(0);
         settingsUi->ubloxSignalStates->blockSignals(true);
         settingsUi->gnssGpsCheckBox->setEnabled(false);
+        settingsUi->gnssGpsCheckBox->setChecked(false);
         settingsUi->gnssSbasCheckBox->setEnabled(false);
+        settingsUi->gnssSbasCheckBox->setChecked(false);
         settingsUi->gnssGalCheckBox->setEnabled(false);
+        settingsUi->gnssGalCheckBox->setChecked(false);
         settingsUi->gnssBeidCheckBox->setEnabled(false);
+        settingsUi->gnssBeidCheckBox->setChecked(false);
         settingsUi->gnssQzssCheckBox->setEnabled(false);
+        settingsUi->gnssQzssCheckBox->setChecked(false);
         settingsUi->gnssGlnsCheckBox->setEnabled(false);
+        settingsUi->gnssGlnsCheckBox->setChecked(false);
         settingsUi->gnssImesCheckBox->setEnabled(false);
+        settingsUi->gnssImesCheckBox->setChecked(false);
         settingsUi->numTrkChannelsLabel->setText("N/A");
         this->setDisabled(true);
     }

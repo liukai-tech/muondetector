@@ -28,6 +28,7 @@ public slots:
     void onGpsFixReceived(quint8 val);
     void onGeodeticPosReceived(GeodeticPos pos);
     void onUiEnabledStateChange(bool connected);
+    void onUbxUptimeReceived(quint32 val);
 
 private:
     Ui::GpsSatsForm *ui;

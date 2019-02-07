@@ -57,6 +57,7 @@ signals:
     void gpsMonHW2Received(qint8 ofsI, quint8 magI, qint8 ofsQ, quint8 magQ, quint8 cfgSrc);
     void gpsVersionReceived(const QString& swString, const QString& hwString, const QString& protString);
 	void gpsFixReceived(quint8 val);
+    void ubxUptimeReceived(quint32 val);
 	
 public slots:
 	void receivedTcpMessage(TcpMessage tcpMessage);

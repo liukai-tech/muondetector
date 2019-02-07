@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>537</width>
-    <height>549</height>
+    <height>574</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_6">
+  <layout class="QGridLayout" name="gridLayout_7">
    <item row="0" column="0">
     <widget class="QGroupBox" name="rxStatsGroupBox">
      <property name="title">
       <string>Receiver Status</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_7">
+     <layout class="QGridLayout" name="gridLayout_6">
       <item row="0" column="0" colspan="2">
        <widget class="QFrame" name="frame">
         <property name="frameShape">
@@ -170,32 +170,79 @@
           </layout>
          </item>
          <item row="1" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <layout class="QHBoxLayout" name="horizontalLayout_18">
            <item>
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>Position Fix</string>
-             </property>
-            </widget>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>Position Fix</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="fixTypeLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::Box</enum>
+               </property>
+               <property name="text">
+                <string>No Fix</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
-            <widget class="QLabel" name="fixTypeLabel">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
              </property>
-             <property name="frameShape">
-              <enum>QFrame::Box</enum>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
              </property>
-             <property name="text">
-              <string>No Fix</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_17">
+             <item>
+              <widget class="QLabel" name="label_17">
+               <property name="text">
+                <string>RX Uptime</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="ubxUptimeLabel">
+               <property name="minimumSize">
+                <size>
+                 <width>30</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::Box</enum>
+               </property>
+               <property name="text">
+                <string>N/A</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </item>

@@ -184,7 +184,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::gpsVersionReceived, satsTab, &GpsSatsForm::onGpsVersionReceived);
     connect(this, &MainWindow::gpsFixReceived, satsTab, &GpsSatsForm::onGpsFixReceived);
     connect(this, &MainWindow::geodeticPos, satsTab, &GpsSatsForm::onGeodeticPosReceived);
-    
+    connect(this, &MainWindow::ubxUptimeReceived, satsTab, &GpsSatsForm::onUbxUptimeReceived);
+
 
 /*
 //    connect(this, &MainWindow::setUiEnabledStates, settings, &Settings::onUiEnabledStateChange);
@@ -500,6 +501,12 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
 	quint32 cnt=0;    	
 	*(tcpMessage.dStream) >> cnt;
         emit intCounterReceived(cnt);
+        return;
+    }
+    if (msgID == gpsUptimeSig){
+    quint32 val=0;
+    *(tcpMessage.dStream) >> val;
+        emit ubxUptimeReceived(val);
         return;
     }
     if (msgID == gpsTxBufSig){

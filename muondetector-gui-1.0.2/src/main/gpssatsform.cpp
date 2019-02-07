@@ -8,7 +8,7 @@ const int MAX_IQTRACK_BUFFER = 250;
 
 const static double PI = 3.1415926535;
 
-const QVector<QString> FIX_TYPE_STRINGS = { "No Fix", "Dead Reck." , "2D-Fix", "3D-Fix", "GPS+Dead Reck.", "Time Only"  };
+const QVector<QString> FIX_TYPE_STRINGS = { "No Fix", "Dead Reck." , "2D-Fix", "3D-Fix", "GPS+Dead Reck.", "Time Fix"  };
 const QString GNSS_ID_STRING[] = { " GPS","SBAS"," GAL","BEID","IMES","QZSS","GLNS"," N/A" };
 
 // helper function to format human readable numbers with common suffixes (k(ilo), M(ega), m(illi) etc.)
@@ -278,6 +278,10 @@ void GpsSatsForm::onGpsFixReceived(quint8 val)
 {
     QString fixType = "N/A";
     if (val<FIX_TYPE_STRINGS.size()) fixType=FIX_TYPE_STRINGS[val];
+    if (val<2)  ui->fixTypeLabel->setStyleSheet("QLabel { background-color : red }");
+    else if (val==2)  ui->fixTypeLabel->setStyleSheet("QLabel { background-color : lightgreen }");
+    else if (val>2)  ui->fixTypeLabel->setStyleSheet("QLabel { background-color : green }");
+    else ui->fixTypeLabel->setStyleSheet("QLabel { background-color : Window }");
     ui->fixTypeLabel->setText(fixType);
 }
 
@@ -296,8 +300,9 @@ void GpsSatsForm::onUiEnabledStateChange(bool connected)
     if (!connected) {
         QVector<GnssSatellite> emptylist;
         onSatsReceived(emptylist);
-        onGpsMonHW2Received(0,0,0,0,0);
         iqTrack.clear();
+        onGpsMonHW2Received(0,0,0,0,0);
+        ui->jammingProgressBar->setValue(0);
         ui->timePrecisionLabel->setText("N/A");
         ui->freqPrecisionLabel->setText("N/A");
         ui->intCounterLabel->setText("N/A");
@@ -306,13 +311,21 @@ void GpsSatsForm::onUiEnabledStateChange(bool connected)
         ui->antStatusLabel->setText("N/A");
         ui->antPowerLabel->setText("N/A");
         ui->fixTypeLabel->setText("N/A");
+        ui->fixTypeLabel->setStyleSheet("QLabel { background-color : Window }");
         ui->xyzResLabel->setText("N/A");
         ui->ubxHwVersionLabel->setText("N/A");
         ui->ubxSwVersionLabel->setText("N/A");
         ui->UBXprotLabel->setText("N/A");
+        ui->ubxUptimeLabel->setText("N/A");
         //ui->satsTableWidget->setRowCount(0);
     }
     ui->jammingProgressBar->setEnabled(connected);
+    iqTrack.clear();
     this->setEnabled(connected);
 
+}
+
+void GpsSatsForm::onUbxUptimeReceived(quint32 val)
+{
+    ui->ubxUptimeLabel->setText(" "+QString::number(val/3600.,'f',2)+" h ");
 }
