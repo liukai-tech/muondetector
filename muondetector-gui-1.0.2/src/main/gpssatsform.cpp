@@ -10,6 +10,7 @@ const static double PI = 3.1415926535;
 
 const QVector<QString> FIX_TYPE_STRINGS = { "No Fix", "Dead Reck." , "2D-Fix", "3D-Fix", "GPS+Dead Reck.", "Time Fix"  };
 const QString GNSS_ID_STRING[] = { " GPS","SBAS"," GAL","BEID","IMES","QZSS","GLNS"," N/A" };
+const QString GNSS_ORBIT_SRC_STRING[] = { "N/A","Ephem","Alm","AOP","AOP+","Alt","Alt","Alt" };
 
 // helper function to format human readable numbers with common suffixes (k(ilo), M(ega), m(illi) etc.)
 QString printReadableFloat(double value, int prec=2, int lowOrderInhibit=-12, int highOrderInhibit=9) {
@@ -155,7 +156,10 @@ void GpsSatsForm::onSatsReceived(const QVector<GnssSatellite> &satlist)
         //newItem8->setBackgroundColor(color);
         newItem8->setSizeHint(QSize(25,24));
         ui->satsTableWidget->setItem(i, 7, newItem8);
-        QTableWidgetItem *newItem9 = new QTableWidgetItem(QString::number(newlist[i].fOrbitSource));
+        int orbSrc=newlist[i].fOrbitSource;
+        if (orbSrc<0) orbSrc=0;
+        if (orbSrc>7) orbSrc=7;
+        QTableWidgetItem *newItem9 = new QTableWidgetItem(GNSS_ORBIT_SRC_STRING[orbSrc]);
         newItem9->setSizeHint(QSize(50,24));
         ui->satsTableWidget->setItem(i, 8, newItem9);
         QTableWidgetItem *newItem10 = new QTableWidgetItem();
