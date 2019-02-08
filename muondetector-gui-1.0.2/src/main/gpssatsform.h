@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <gnsssatellite.h>
 #include <geodeticpos.h>
+#include <QMap>
+#include <QVector>
 
 namespace Ui {
 class GpsSatsForm;
@@ -33,6 +35,8 @@ public slots:
 private:
     Ui::GpsSatsForm *ui;
     QVector<QPointF> iqTrack;
+    QMap<int, QVector<QPointF>> satTracks;
+
 };
 
 #endif // GPSSATSFORM_H
