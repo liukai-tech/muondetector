@@ -101,6 +101,11 @@ void GpsSatsForm::onSatsReceived(const QVector<GnssSatellite> &satlist)
             int alpha = satlist[i].fCnr*255/40;
             if (alpha>255) alpha=255;
             satColor.setAlpha(alpha);
+            int satId = satlist[i].fGnssId*1000 + satlist[i].fSatId;
+            for (int i=0; i<satTracks[satId].size(); i++) {
+                satPosPainter.drawPoint(satTracks[satId][i]);
+            }
+            satTracks[satId].push_back(QPointF(xpos+satPosPixmapSize/2,ypos+satPosPixmapSize/2));
             satPosPainter.setBrush(satColor);
 /*
             if (satlist[i].fCnr>40) satPosPainter.setBrush(Qt::darkGreen);
@@ -305,6 +310,7 @@ void GpsSatsForm::onUiEnabledStateChange(bool connected)
         QVector<GnssSatellite> emptylist;
         onSatsReceived(emptylist);
         iqTrack.clear();
+        satTracks.clear();
         onGpsMonHW2Received(0,0,0,0,0);
         ui->jammingProgressBar->setValue(0);
         ui->timePrecisionLabel->setText("N/A");
