@@ -8,6 +8,7 @@
 #include <gpio_pin_definitions.h>
 #include <calib_struct.h>
 #include <gnsssatellite.h>
+#include <ublox_structs.h>
 #include <settings.h>
 #include <status.h>
 #include <tcpmessage_keys.h>
@@ -55,6 +56,21 @@ QDataStream& operator >> (QDataStream& in, GnssSatellite& sat)
 	return in;
 }
 
+QDataStream& operator >> (QDataStream& in, UbxTimePulseStruct& tp)
+{
+    in >> tp.tpIndex >> tp.version >> tp.antCableDelay >> tp.rfGroupDelay
+	>> tp.freqPeriod >> tp.freqPeriodLock >> tp.pulseLenRatio >> tp.pulseLenRatioLock
+	>> tp.userConfigDelay >> tp.flags;
+    return in;
+}
+
+QDataStream& operator << (QDataStream& out, const UbxTimePulseStruct& tp)
+{
+    out << tp.tpIndex << tp.version << tp.antCableDelay << tp.rfGroupDelay
+	<< tp.freqPeriod << tp.freqPeriodLock << tp.pulseLenRatio << tp.pulseLenRatioLock
+	<< tp.userConfigDelay << tp.flags;
+    return out;
+}
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -65,7 +81,9 @@ MainWindow::MainWindow(QWidget *parent) :
     qRegisterMetaType<bool>("bool");
     qRegisterMetaType<I2cDeviceEntry>("I2cDeviceEntry");
     qRegisterMetaType<CalibStruct>("CalibStruct");
-	qRegisterMetaType<std::vector<GnssSatellite>>("std::vector<GnssSatellite>");
+    qRegisterMetaType<std::vector<GnssSatellite>>("std::vector<GnssSatellite>");
+    qRegisterMetaType<UbxTimePulseStruct>("UbxTimePulseStruct");
+	
     ui->setupUi(this);
 	ui->discr1Layout->setAlignment(ui->discr1Slider, Qt::AlignHCenter);
     ui->discr2Layout->setAlignment(ui->discr2Slider, Qt::AlignHCenter); // aligns the slider in their vertical layout centered
@@ -131,7 +149,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::gainSwitchReceived, status, &Status::onGainSwitchReceived);
     connect(status, &Status::gainSwitchChanged, this, &MainWindow::sendGainSwitch);
     connect(this, &MainWindow::temperatureReceived, status, &Status::onTemperatureReceived);
-    
     ui->tabWidget->addTab(status,"status");
 
     Settings *settings = new Settings(this);
@@ -145,6 +162,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(settings, &Settings::sendUbxConfigDefault, this, [this](){ this->sendRequest(ubxConfigureDefaultSig); } );
     connect(this, &MainWindow::gnssConfigsReceived, settings, &Settings::onGnssConfigsReceived);
     connect(settings, &Settings::setGnssConfigs, this, &MainWindow::onSetGnssConfigs);
+    connect(this, &MainWindow::gpsTP5Received, settings, &Settings::onTP5Received);
 
     ui->tabWidget->addTab(settings,"settings");
 
@@ -552,6 +570,12 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
 	quint8 val=0;
 	*(tcpMessage.dStream) >> val;
         emit gpsFixReceived(val);
+        return;
+    }
+    if (msgID == gpsCfgTP5Sig){
+	UbxTimePulseStruct tp;
+	*(tcpMessage.dStream) >> tp;
+        emit gpsTP5Received(tp);
         return;
     }
 }

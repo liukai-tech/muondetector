@@ -5,6 +5,7 @@
 #include <QTableWidget>
 #include <QtWidgets>
 #include <gnsssatellite.h>
+#include <ublox_structs.h>
 
 
 class UbxMsgRateTableItem : public QTableWidgetItem
@@ -35,19 +36,18 @@ signals:
 
 
 public slots:
-	void addUbxMsgRates(QMap<uint16_t, int> ubxMsgRates);
+    void addUbxMsgRates(QMap<uint16_t, int> ubxMsgRates);
     void onItemChanged(QTableWidgetItem *item);
     void onUiEnabledStateChange(bool connected);
     void onTxBufReceived(quint8 val);
     void onTxBufPeakReceived(quint8 val);
     void onGnssConfigsReceived(quint8 numTrkCh, const QVector<GnssConfigStruct>& configList);
+    //void onGpsTP5Received(const UbxTimePulseStruct& tp);
+    void onTP5Received(const UbxTimePulseStruct& tp);
 
 private slots:
-
     void onSettingsButtonBoxClicked(QAbstractButton *button);
-
     void on_ubxResetPushButton_clicked();
-    
     void on_setGnssConfigPushButton_clicked();
 
 private:

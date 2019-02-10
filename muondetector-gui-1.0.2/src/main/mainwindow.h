@@ -16,6 +16,7 @@ struct CalibStruct;
 struct GnssConfigStruct;
 class GnssSatellite;
 class CalibForm;
+struct UbxTimePulseStruct;
 
 namespace Ui {
 	class MainWindow;
@@ -58,6 +59,7 @@ signals:
     void gpsVersionReceived(const QString& swString, const QString& hwString, const QString& protString);
 	void gpsFixReceived(quint8 val);
     void ubxUptimeReceived(quint32 val);
+    void gpsTP5Received(const UbxTimePulseStruct& tp);
 	
 public slots:
 	void receivedTcpMessage(TcpMessage tcpMessage);

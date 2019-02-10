@@ -172,6 +172,12 @@ void Settings::onGnssConfigsReceived(quint8 numTrkCh, const QVector<GnssConfigSt
     }
 }
 
+void Settings::onTP5Received(const UbxTimePulseStruct &tp)
+{
+    //
+    settingsUi->antDelayLineEdit->setText(QString::number(tp.antCableDelay));
+}
+
 
 void Settings::on_ubxResetPushButton_clicked()
 {
