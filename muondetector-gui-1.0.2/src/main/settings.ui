@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>587</width>
-    <height>377</height>
+    <height>457</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -28,8 +28,8 @@
   <property name="modal">
    <bool>true</bool>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0" rowspan="6">
+  <layout class="QGridLayout" name="gridLayout_3">
+   <item row="0" column="0" rowspan="7">
     <layout class="QVBoxLayout" name="verticalLayout_4">
      <item>
       <widget class="QLabel" name="label">
@@ -258,6 +258,36 @@
     </widget>
    </item>
    <item row="2" column="2">
+    <widget class="QGroupBox" name="timePulseGroupBox">
+     <property name="title">
+      <string>Time Pulse Settings</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Antenna Delay</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="antDelayLineEdit"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>ns</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="2">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -273,21 +303,21 @@
      </property>
     </spacer>
    </item>
-   <item row="3" column="2">
+   <item row="4" column="2">
     <widget class="QPushButton" name="ubxResetPushButton">
      <property name="text">
       <string>Reset Ublox Chip</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="2">
+   <item row="5" column="2">
     <widget class="Line" name="line">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
-   <item row="5" column="2">
+   <item row="6" column="2">
     <widget class="QDialogButtonBox" name="settingsButtonBox">
      <property name="standardButtons">
       <set>QDialogButtonBox::Apply|QDialogButtonBox::Discard|QDialogButtonBox::RestoreDefaults</set>
