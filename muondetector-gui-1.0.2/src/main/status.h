@@ -25,6 +25,7 @@ signals:
 	void gainSwitchChanged(bool state);
 	void preamp1SwitchChanged(bool state);
 	void preamp2SwitchChanged(bool state);
+    void resetRateClicked();
 public slots:
     void onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates);
     void onAdcSampleReceived(uint8_t channel, float value);
@@ -38,6 +39,7 @@ public slots:
    	void onDacReadbackReceived(uint8_t channel, float value);
     void onTemperatureReceived(float value);
    	void clearPulseHeightHisto();
+    void clearRatePlot();
 
 private:
     Ui::Status *statusUi;

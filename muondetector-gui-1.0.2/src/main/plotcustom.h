@@ -18,13 +18,14 @@ public:
     QwtPlotGrid *grid = nullptr;
     QwtPlotCurve *xorCurve = nullptr;
     QwtPlotCurve *andCurve = nullptr;
-    void setStatusEnabled(bool status);
 
     // for other plots: subclass "PlotCustom" and put all specific functions (like below) to the new class
     void plotXorSamples(QVector<QPointF>& xorSamples);
     void plotAndSamples(QVector<QPointF>& andSamples);
 
     const QString title = "Rate Statistics";
+public slots:
+    void setStatusEnabled(bool status);
 };
 
 #endif // PLOTCUSTOM_H
