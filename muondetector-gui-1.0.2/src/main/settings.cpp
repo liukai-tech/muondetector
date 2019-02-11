@@ -176,6 +176,17 @@ void Settings::onTP5Received(const UbxTimePulseStruct &tp)
 {
     //
     settingsUi->antDelayLineEdit->setText(QString::number(tp.antCableDelay));
+    settingsUi->groupDelayLineEdit->setText(QString::number(tp.rfGroupDelay));
+    settingsUi->userDelayLineEdit->setText(QString::number(tp.userConfigDelay));
+    settingsUi->freqPeriodLineEdit->setText(QString::number(tp.freqPeriod));
+    settingsUi->freqPeriodLockLineEdit->setText(QString::number(tp.freqPeriodLock));
+    settingsUi->pulseLenLineEdit->setText(QString::number(tp.pulseLenRatio));
+    settingsUi->pulseLenLockLineEdit->setText(QString::number(tp.pulseLenRatioLock));
+    settingsUi->tpActiveCheckBox->setChecked(tp.flags & UbxTimePulseStruct::ACTIVE);
+    settingsUi->lockGpsCheckBox->setChecked(tp.flags & UbxTimePulseStruct::LOCK_GPS);
+    settingsUi->lockOtherCheckBox->setChecked(tp.flags & UbxTimePulseStruct::LOCK_OTHER);
+    settingsUi->timeGridComboBox->setCurrentIndex((tp.flags & UbxTimePulseStruct::GRID_UTC_GPS)>>7);
+    settingsUi->tpPolarityCheckBox->setChecked((tp.flags & UbxTimePulseStruct::POLARITY));
 }
 
 
