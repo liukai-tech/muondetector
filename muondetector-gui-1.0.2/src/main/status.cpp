@@ -21,6 +21,10 @@ Status::Status(QWidget *parent) :
 	statusUi->pulseHeightHistogram->setLogY(false);
 
     connect(statusUi->resetHistoPushButton, &QPushButton::clicked, this, &Status::clearPulseHeightHisto);
+    connect(statusUi->resetRatePushButton, &QPushButton::clicked, this, &Status::clearRatePlot);
+    connect(statusUi->resetRatePushButton, &QPushButton::clicked, this, [this](){ this->resetRateClicked(); } );
+    connect(statusUi->ratePlotGroupBox, &QGroupBox::toggled, statusUi->ratePlot, &PlotCustom::setStatusEnabled);
+    connect(statusUi->pulseHeightHistogramGroupBox, &QGroupBox::toggled, statusUi->pulseHeightHistogram, &CustomHistogram::setStatusEnabled);
     connect(statusUi->biasEnableCheckBox, &QCheckBox::clicked, this, &Status::biasSwitchChanged);
     connect(statusUi->highGainCheckBox, &QCheckBox::clicked, this, &Status::gainSwitchChanged);
     connect(statusUi->preamp1CheckBox, &QCheckBox::clicked, this, &Status::preamp1SwitchChanged);
@@ -92,6 +96,14 @@ void Status::onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates){
     }
 }
 
+void Status::clearRatePlot()
+{
+    andSamples.clear();
+    xorSamples.clear();
+    statusUi->ratePlot->plotXorSamples(xorSamples);
+    statusUi->ratePlot->plotAndSamples(andSamples);
+}
+
 void Status::clearPulseHeightHisto()
 {
 	statusUi->pulseHeightHistogram->clear();
@@ -126,13 +138,17 @@ void Status::updatePulseHeightHistogram()
 
 void Status::onUiEnabledStateChange(bool connected){
     if (connected){
-        statusUi->ratePlot->setStatusEnabled(true);
-        statusUi->pulseHeightHistogram->setStatusEnabled(true);
+        if (statusUi->ratePlotGroupBox->isChecked()){
+            statusUi->ratePlot->setStatusEnabled(true);
+        }
+        if (statusUi->pulseHeightHistogramGroupBox->isChecked()){
+            statusUi->pulseHeightHistogram->setStatusEnabled(true);
+        }
         this->setEnabled(true);
     }else{
         andSamples.clear();
         xorSamples.clear();
-//		updatePulseHeightHistogram();
+//		updatePulseHeightHistogram();        
         statusUi->ratePlot->setStatusEnabled(false);
         statusUi->pulseHeightHistogram->clear();
 		statusUi->pulseHeightHistogram->setStatusEnabled(false);

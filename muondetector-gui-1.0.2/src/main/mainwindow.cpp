@@ -137,6 +137,7 @@ MainWindow::MainWindow(QWidget *parent) :
     Status *status = new Status(this);
     connect(this, &MainWindow::setUiEnabledStates, status, &Status::onUiEnabledStateChange);
     connect(this, &MainWindow::gpioRates, status, &Status::onGpioRatesReceived);
+    connect(status, &Status::resetRateClicked, this, [this](){ this->sendRequest(resetRateSig); } );
     connect(this, &MainWindow::adcSampleReceived, status, &Status::onAdcSampleReceived);
     connect(this, &MainWindow::dacReadbackReceived, status, &Status::onDacReadbackReceived);
     connect(status, &Status::inputSwitchChanged, this, &MainWindow::sendInputSwitch);

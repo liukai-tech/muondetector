@@ -18,8 +18,8 @@ void PlotCustom::initialize(){
        setAxisAutoScale(QwtPlot::yRight,true);
 
        grid = new QwtPlotGrid();
-       const QPen blackPen(Qt::black);
-       grid->setPen(blackPen);
+       const QPen grayPen(Qt::gray);
+       grid->setPen(grayPen);
        grid->attach(this);
 
        xorCurve = new QwtPlotCurve();
@@ -58,8 +58,11 @@ void PlotCustom::plotXorSamples(QVector<QPointF>& xorSamples){
         samples.push_back(sample);
         samples.last().setX(sample.x() - xorSamples.at(xorSamples.size()-1).x());
     }
-    double xMin = samples.first().x();
-    double xMax = 0;
+    double xMin = 0.0;
+    double xMax = 0.0;
+    if (!samples.isEmpty()){
+        xMin = samples.first().x();
+    }
     double step = (xMax-xMin)/6;
     setAxisScale(QwtPlot::xBottom,xMin,xMax,step);
     QwtPointSeriesData *data = new QwtPointSeriesData(samples);
@@ -77,8 +80,11 @@ void PlotCustom::plotAndSamples(QVector<QPointF>& andSamples){
         samples.push_back(sample);
         samples.last().setX(sample.x() - andSamples.at(andSamples.size()-1).x());
     }
-    double xMin = samples.first().x();
-    double xMax = 0;
+    double xMin = 0.0;
+    double xMax = 0.0;
+    if (!samples.isEmpty()){
+        xMax = samples.first().x();
+    }
     double step = (double)(int)((xMax-xMin)/6);
     setAxisScale(QwtPlot::xBottom,xMin,xMax,step);
     QwtPointSeriesData *data = new QwtPointSeriesData(samples);
@@ -93,11 +99,15 @@ void PlotCustom::setStatusEnabled(bool status){
     if (status==true){
         xorCurve->attach(this);
         andCurve->attach(this);
+        const QPen blackPen(Qt::black);
+        grid->setPen(blackPen);
         setTitle(title);
         replot();
     }else{
         xorCurve->detach();
         andCurve->detach();
+        const QPen grayPen(Qt::gray);
+        grid->setPen(grayPen);
         setTitle("");
         replot();
     }

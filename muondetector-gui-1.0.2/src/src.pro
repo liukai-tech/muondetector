@@ -81,7 +81,8 @@ HEADERS += \
     main/settings.h \
     main/status.h \
     main/map.h \
-	main/i2cform.h \
+        main/i2cform.h \
+    main/plotcustom.h \
     main/custom_histogram_widget.h \
     main/custom_plot_widget.h \
     main/calibform.h \

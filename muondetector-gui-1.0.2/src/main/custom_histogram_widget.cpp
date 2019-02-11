@@ -23,8 +23,8 @@ void CustomHistogram::initialize(){
        //setAxisAutoScale(QwtPlot::yRight,true);
 
 	grid = new QwtPlotGrid();
-	const QPen blackPen(Qt::black);
-	grid->setPen(blackPen);
+    const QPen grayPen(Qt::gray);
+    grid->setPen(grayPen);
 	grid->attach(this);
 	fBarChart = new QwtPlotHistogram( title );
 		//fBarChart = new QwtPlotBarChart( title );
@@ -183,10 +183,14 @@ void CustomHistogram::clear()
 
 void CustomHistogram::setStatusEnabled(bool status){
     if (status==true){
+        const QPen blackPen(Qt::black);
+        grid->setPen(blackPen);
         fBarChart->attach(this);
         setTitle(title);
         update();
     }else{
+        const QPen grayPen(Qt::gray);
+        grid->setPen(grayPen);
         fBarChart->detach();
         setTitle("");
         update();
