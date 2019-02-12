@@ -164,6 +164,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::gnssConfigsReceived, settings, &Settings::onGnssConfigsReceived);
     connect(settings, &Settings::setGnssConfigs, this, &MainWindow::onSetGnssConfigs);
     connect(this, &MainWindow::gpsTP5Received, settings, &Settings::onTP5Received);
+    connect(settings, &Settings::setTP5Config, this, &MainWindow::onSetTP5Config);
 
     ui->tabWidget->addTab(settings,"settings");
 
@@ -657,6 +658,13 @@ void MainWindow::onSetGnssConfigs(const QVector<GnssConfigStruct>& configList){
         *(tcpMessage.dStream) << configList[i].gnssId<<configList[i].resTrkCh
                               << configList[i].maxTrkCh<<configList[i].flags;
     }
+    emit sendTcpMessage(tcpMessage);
+}
+
+void MainWindow::onSetTP5Config(const UbxTimePulseStruct &tp)
+{
+    TcpMessage tcpMessage(gpsCfgTP5Sig);
+    *(tcpMessage.dStream) << tp;
     emit sendTcpMessage(tcpMessage);
 }
 

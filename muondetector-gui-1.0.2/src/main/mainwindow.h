@@ -108,6 +108,7 @@ private slots:
 
     void on_biasControlTypeComboBox_currentIndexChanged(int index);
     void onSetGnssConfigs(const QVector<GnssConfigStruct>& configList);
+    void onSetTP5Config(const UbxTimePulseStruct& tp);
 
 private:
 	Ui::MainWindow *ui;
