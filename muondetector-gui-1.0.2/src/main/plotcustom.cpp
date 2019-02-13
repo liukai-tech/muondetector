@@ -14,7 +14,7 @@ void PlotCustom::initialize(){
        setAutoReplot(false);
        enableAxis(QwtPlot::yLeft,false);
        enableAxis(QwtPlot::yRight,true);
-       setAxisAutoScale(QwtPlot::xBottom,false);
+       //setAxisAutoScale(QwtPlot::xBottom,false);
        setAxisAutoScale(QwtPlot::yRight,true);
 
        grid = new QwtPlotGrid();
@@ -23,7 +23,7 @@ void PlotCustom::initialize(){
        grid->attach(this);
 
        xorCurve = new QwtPlotCurve();
-       xorCurve->setYAxis(QwtPlot::yRight);
+       xorCurve->setAxes(QwtPlot::xBottom,QwtPlot::yRight);
        xorCurve->setRenderHint(QwtPlotCurve::RenderAntialiased, true);
        //xorCurve->setStyle(QwtPlotCurve::Steps);
        QColor xorCurveColor = Qt::darkGreen;
@@ -34,7 +34,7 @@ void PlotCustom::initialize(){
        xorCurve->attach(this);
 
        andCurve = new QwtPlotCurve();
-       andCurve->setYAxis(QwtPlot::yRight);
+       andCurve->setAxes(QwtPlot::xBottom,QwtPlot::yRight);
        andCurve->setRenderHint(QwtPlotCurve::RenderAntialiased, true);
        //xorCurve->setStyle(QwtPlotCurve::Steps);
        QColor andCurveColor = Qt::darkBlue;
@@ -58,12 +58,12 @@ void PlotCustom::plotXorSamples(QVector<QPointF>& xorSamples){
         samples.push_back(sample);
         samples.last().setX(sample.x() - xorSamples.at(xorSamples.size()-1).x());
     }
-    double xMin = 0.0;
-    double xMax = 0.0;
+    qreal xMin = 0.0;
+    qreal xMax = 0.0;
     if (!samples.isEmpty()){
         xMin = samples.first().x();
     }
-    double step = (xMax-xMin)/6;
+    qreal step = (double)(int)((xMax-xMin)/6);
     setAxisScale(QwtPlot::xBottom,xMin,xMax,step);
     QwtPointSeriesData *data = new QwtPointSeriesData(samples);
     xorCurve->setData(data);
@@ -80,12 +80,12 @@ void PlotCustom::plotAndSamples(QVector<QPointF>& andSamples){
         samples.push_back(sample);
         samples.last().setX(sample.x() - andSamples.at(andSamples.size()-1).x());
     }
-    double xMin = 0.0;
-    double xMax = 0.0;
+    qreal xMin = 0.0;
+    qreal xMax = 0.0;
     if (!samples.isEmpty()){
-        xMax = samples.first().x();
+        xMin = samples.first().x();
     }
-    double step = (double)(int)((xMax-xMin)/6);
+    qreal step = (double)(int)((xMax-xMin)/6);
     setAxisScale(QwtPlot::xBottom,xMin,xMax,step);
     QwtPointSeriesData *data = new QwtPointSeriesData(samples);
     andCurve->setData(data);
