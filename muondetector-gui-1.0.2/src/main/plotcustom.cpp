@@ -1,12 +1,30 @@
 #include <plotcustom.h>
+#include <QTime>
 #include <qwt_legend.h>
+#include <qwt_scale_draw.h>
 #include <qwt.h>
 
-PlotCustom::~PlotCustom(){
-    if (xorCurve!=nullptr) { delete xorCurve; xorCurve=nullptr;}
-    if (andCurve!=nullptr) { delete andCurve; andCurve=nullptr;}
-    if (grid!=nullptr) { delete grid; grid=nullptr;}
-}
+class TimeScaleDraw : public QwtScaleDraw
+{
+public:
+    TimeScaleDraw(const QTime &base, const bool invert = true):
+        baseTime(base), invertValues(invert)
+    {
+    }
+    virtual QwtText label(qreal v) const
+    {
+        if (invertValues){
+            QTime upTime = baseTime.addSecs(-(int)v);
+            return QString("- "+upTime.toString());
+        }else{
+            QTime upTime = baseTime.addSecs((int)v);
+            return QString(upTime.toString());
+        }
+    }
+private:
+    bool invertValues;
+    QTime baseTime;
+};
 
 void PlotCustom::initialize(){
        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -17,97 +35,90 @@ void PlotCustom::initialize(){
        //setAxisAutoScale(QwtPlot::xBottom,false);
        setAxisAutoScale(QwtPlot::yRight,true);
 
-       grid = new QwtPlotGrid();
        const QPen grayPen(Qt::gray);
-       grid->setPen(grayPen);
-       grid->attach(this);
+       grid.setPen(grayPen);
+       grid.attach(this);
 
-       xorCurve = new QwtPlotCurve();
-       xorCurve->setAxes(QwtPlot::xBottom,QwtPlot::yRight);
-       xorCurve->setRenderHint(QwtPlotCurve::RenderAntialiased, true);
-       //xorCurve->setStyle(QwtPlotCurve::Steps);
+       xorCurve.setAxes(QwtPlot::xBottom,QwtPlot::yRight);
+       xorCurve.setRenderHint(QwtPlotCurve::RenderAntialiased, true);
+       //xorCurve.setStyle(QwtPlotCurve::Steps);
        QColor xorCurveColor = Qt::darkGreen;
        xorCurveColor.setAlphaF(0.3);
        const QPen greenPen(xorCurveColor);
-       xorCurve->setPen(greenPen);
-       xorCurve->setBrush(xorCurveColor);
-       xorCurve->attach(this);
+       xorCurve.setPen(greenPen);
+       xorCurve.setBrush(xorCurveColor);
+       xorCurve.attach(this);
 
-       andCurve = new QwtPlotCurve();
-       andCurve->setAxes(QwtPlot::xBottom,QwtPlot::yRight);
-       andCurve->setRenderHint(QwtPlotCurve::RenderAntialiased, true);
-       //xorCurve->setStyle(QwtPlotCurve::Steps);
+       andCurve.setAxes(QwtPlot::xBottom,QwtPlot::yRight);
+       andCurve.setRenderHint(QwtPlotCurve::RenderAntialiased, true);
+       //xorCurve.setStyle(QwtPlotCurve::Steps);
        QColor andCurveColor = Qt::darkBlue;
        andCurveColor.setAlphaF(0.3);
        const QPen bluePen(andCurveColor);
-       andCurve->setPen(bluePen);
-       andCurve->setBrush(andCurveColor);
-       andCurve->attach(this);
+       andCurve.setPen(bluePen);
+       andCurve.setBrush(andCurveColor);
+       andCurve.attach(this);
        replot();
        show();
 }
 
-void PlotCustom::plotXorSamples(QVector<QPointF>& xorSamples){
-    
-	if (!isEnabled()) return;
-	if (xorCurve == nullptr){
-		return;
-	}
-    QVector<QPointF> samples;
-    for (auto sample : xorSamples){
-        samples.push_back(sample);
-        samples.last().setX(sample.x() - xorSamples.at(xorSamples.size()-1).x());
+void PlotCustom::plotSamples(QVector<QPointF>& samples, QwtPlotCurve& curve){
+    if (!isEnabled()) return;
+    QVector<QPointF> someSamples;
+    for (auto sample : samples){
+        someSamples.push_back(sample);
+        someSamples.last().setX(sample.x() - samples.at(samples.size()-1).x());
     }
+
     qreal xMin = 0.0;
     qreal xMax = 0.0;
-    if (!samples.isEmpty()){
-        xMin = samples.first().x();
+    if (!someSamples.isEmpty()){
+        xMin = someSamples.first().x();
     }
     qreal step = (double)(int)((xMax-xMin)/6);
+    if (this->size().width()<450){
+        step = (double)(int)((xMax-xMin)/3);
+    }
     setAxisScale(QwtPlot::xBottom,xMin,xMax,step);
-    QwtPointSeriesData *data = new QwtPointSeriesData(samples);
-    xorCurve->setData(data);
+    QwtPointSeriesData *data = new QwtPointSeriesData(someSamples);
+    curve.setData(data);
     replot();
 }
 
+void PlotCustom::plotXorSamples(QVector<QPointF>& xorSamples){
+    plotSamples(xorSamples,xorCurve);
+}
+
 void PlotCustom::plotAndSamples(QVector<QPointF>& andSamples){
-	if (!isEnabled()) return;
-    if (andCurve==nullptr){
-        return;
+    plotSamples(andSamples,andCurve);
+}
+
+void PlotCustom::setPreset(QString preset){
+    if (preset=="seconds"){
+        setAxisScaleDraw(QwtPlot::xBottom, new QwtScaleDraw());
     }
-    QVector<QPointF> samples;
-    for (auto sample : andSamples){
-        samples.push_back(sample);
-        samples.last().setX(sample.x() - andSamples.at(andSamples.size()-1).x());
+    if (preset=="hh:mm:ss"){
+        setAxisScaleDraw(QwtPlot::xBottom, new TimeScaleDraw(QTime(0,0,0,0),true));
     }
-    qreal xMin = 0.0;
-    qreal xMax = 0.0;
-    if (!samples.isEmpty()){
-        xMin = samples.first().x();
+    if (preset=="time"){
+        setAxisScaleDraw(QwtPlot::xBottom, new TimeScaleDraw(QTime::currentTime(),false));
     }
-    qreal step = (double)(int)((xMax-xMin)/6);
-    setAxisScale(QwtPlot::xBottom,xMin,xMax,step);
-    QwtPointSeriesData *data = new QwtPointSeriesData(samples);
-    andCurve->setData(data);
     replot();
 }
 
 void PlotCustom::setStatusEnabled(bool status){
-    if (xorCurve == nullptr || andCurve == nullptr){
-        return;
-    }
     if (status==true){
-        xorCurve->attach(this);
-        andCurve->attach(this);
+        xorCurve.attach(this);
+        andCurve.attach(this);
         const QPen blackPen(Qt::black);
-        grid->setPen(blackPen);
+        grid.setPen(blackPen);
         setTitle(title);
         replot();
     }else{
-        xorCurve->detach();
-        andCurve->detach();
+        xorCurve.detach();
+        andCurve.detach();
         const QPen grayPen(Qt::gray);
-        grid->setPen(grayPen);
+        grid.setPen(grayPen);
         setTitle("");
         replot();
     }

@@ -41,6 +41,9 @@ public slots:
    	void clearPulseHeightHisto();
     void clearRatePlot();
 
+private slots:
+    void setRateSecondsBuffered(const QString& bufferTime);
+
 private:
     Ui::Status *statusUi;
     QVector<QPointF> xorSamples;
