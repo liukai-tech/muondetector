@@ -35,6 +35,10 @@ void PlotCustom::initialize(){
        //setAxisAutoScale(QwtPlot::xBottom,false);
        setAxisAutoScale(QwtPlot::yRight,true);
 
+       QwtLegend *legend = new QwtLegend(this);
+       legend->setDefaultItemMode(QwtLegendData::Checkable);
+       this->insertLegend(legend,QwtPlot::BottomLegend);
+
        const QPen grayPen(Qt::gray);
        grid.setPen(grayPen);
        grid.attach(this);
@@ -45,10 +49,12 @@ void PlotCustom::initialize(){
        QColor xorCurveColor = Qt::darkGreen;
        xorCurveColor.setAlphaF(0.3);
        const QPen greenPen(xorCurveColor);
+       xorCurve.setTitle(QwtText("xor-curve"));
        xorCurve.setPen(greenPen);
        xorCurve.setBrush(xorCurveColor);
        xorCurve.attach(this);
 
+       andCurve.setTitle(QwtText("and-curve"));
        andCurve.setAxes(QwtPlot::xBottom,QwtPlot::yRight);
        andCurve.setRenderHint(QwtPlotCurve::RenderAntialiased, true);
        //xorCurve.setStyle(QwtPlotCurve::Steps);
@@ -58,6 +64,26 @@ void PlotCustom::initialize(){
        andCurve.setPen(bluePen);
        andCurve.setBrush(andCurveColor);
        andCurve.attach(this);
+       connect(legend, &QwtLegend::checked, this, [this](const QVariant &itemInfo, bool on, int index){
+            if (on){
+                if (itemInfo=="xor-curve"){
+                    xorCurve.show();
+                }
+                if (itemInfo=="xor-curve"){
+                    andCurve.show();
+                }
+            }else{
+                if (itemInfo=="xor-curve"){
+                    xorCurve.hide();
+                }
+                if (itemInfo=="xor-curve"){
+                    andCurve.hide();
+                }
+            }
+            this->replot();
+       });
+       legend->checked(QString(""),true,0);
+       legend->checked(QString(""),true,1);
        replot();
        show();
 }
