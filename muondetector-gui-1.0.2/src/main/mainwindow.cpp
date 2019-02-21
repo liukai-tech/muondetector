@@ -17,6 +17,7 @@
 #include <calibform.h>
 #include <gpssatsform.h>
 #include <iostream>
+#include <histogram.h>
 
 using namespace std;
 
@@ -70,6 +71,18 @@ QDataStream& operator << (QDataStream& out, const UbxTimePulseStruct& tp)
 	<< tp.freqPeriod << tp.freqPeriodLock << tp.pulseLenRatio << tp.pulseLenRatioLock
 	<< tp.userConfigDelay << tp.flags;
     return out;
+}
+
+QDataStream& operator >> (QDataStream& in, Histogram& h)
+{
+	QString name;
+	in >> name >> h.fMin >> h.fMax >> h.fUnderflow >> h.fOverflow >> h.fNrBins;
+	h.setName(name.toStdString());
+	h.clear();
+	for (int i=0; i<h.fNrBins; i++) {
+		in >> h.fHistogramMap[i];
+	}
+    return in;
 }
 
 MainWindow::MainWindow(QWidget *parent) :

@@ -88,6 +88,15 @@ QDataStream& operator >> (QDataStream& in, UbxTimePulseStruct& tp)
     return in;
 }
 
+QDataStream& operator << (QDataStream& out, const Histogram& h)
+{
+	out << QString::fromStdString(h.fName) << h.fMin << h.fMax << h.fUnderflow << h.fOverflow << h.fNrBins;
+	for (int i=0; i<h.fNrBins; i++) {
+		out << h.getBinContent(i);
+	}
+    return out;
+}
+
 // signal handling stuff: put code to execute before shutdown down there
 static int setup_unix_signal_handlers()
 {
@@ -364,14 +373,10 @@ Daemon::Daemon(QString username, QString password, QString new_gpsdevname, int n
 		cerr<<"PCA9536 device NOT present!"<<endl;
 	}
     
-    if (dacThresh[0] > 0) {
-        if (dac->devicePresent()) dac->setVoltage(DAC_TH1, dacThresh[0]);
-    }
-    if (dacThresh[1] > 0) {
-        if (dac->devicePresent()) dac->setVoltage(DAC_TH2, dacThresh[1]);
-    }
-	if (biasVoltage > 0) {
-        if (dac->devicePresent()) dac->setVoltage(DAC_BIAS, biasVoltage);
+    if (dac->devicePresent()) {
+		if (dacThresh[0] > 0) dac->setVoltage(DAC_TH1, dacThresh[0]);
+		if (dacThresh[1] > 0) dac->setVoltage(DAC_TH2, dacThresh[1]);
+		if (biasVoltage > 0) dac->setVoltage(DAC_BIAS, biasVoltage);
 	}
 
 	// EEPROM 24AA02 type
@@ -620,16 +625,19 @@ void Daemon::connectToGps() {
 	connect(this, &Daemon::UBXSetAopCfg, qtGps, &QtSerialUblox::UBXSetAopCfg);
 
     // connect fileHandler related stuff
+    geoHeightHisto.setMax(1000.);
+    geoHeightHisto.setNrBins(10000);
+    geoHeightHisto.setName("geoHeight");
+    geoHeightHisto.clear();
     connect(qtGps, &QtSerialUblox::gpsPropertyUpdatedGeodeticPos, this, [this](GeodeticPos pos){
 		logParameter(LogParameter("geoLongitude", QString::number(1e-7*pos.lon,'f',5)+" deg"));
 		logParameter(LogParameter("geoLatitude", QString::number(1e-7*pos.lat,'f',5)+" deg"));
 		logParameter(LogParameter("geoHeightMSL", QString::number(1e-3*pos.hMSL,'f',2)+" m"));
+		geoHeightHisto.fill(1e-3*pos.hMSL);
+		this->sendHistogram(geoHeightHisto);
+		logParameter(LogParameter("meanGeoHeightMSL", QString::number(geoHeightHisto.getMean(),'f',2)+" m"));
 		logParameter(LogParameter("geoHorAccuracy", QString::number(1e-3*pos.hAcc,'f',2)+" m"));
 		logParameter(LogParameter("geoVertAccuracy", QString::number(1e-3*pos.vAcc,'f',2)+" m"));
-/*
-        LogParameter log(QString("geodeticPos"),QString("%1 %2 %3 %4 %5 %6 %7").arg(pos.iTOW).arg(pos.lon).arg(pos.lat).arg(pos.height).arg(pos.hMSL).arg(pos.hAcc).arg(pos.vAcc));
-        this->logParameter(log);
-*/
     });
     connect(qtGps, &QtSerialUblox::gpsPropertyUpdatedGnss, this, [this](std::vector<GnssSatellite> satlist, std::chrono::duration<double> updateAge){
         int allSats=0, usedSats=0, maxCnr=0;
@@ -949,6 +957,12 @@ void Daemon::sendUbxGeodeticPos(GeodeticPos pos){
     (*tcpMessage.dStream) << pos.iTOW << pos.lon << pos.lat
                           << pos.height << pos.hMSL << pos.hAcc
                           << pos.vAcc;
+    emit sendTcpMessage(tcpMessage);
+}
+
+void Daemon::sendHistogram(const Histogram& hist){
+    TcpMessage tcpMessage(histogramSig);
+    (*tcpMessage.dStream) << hist;
     emit sendTcpMessage(tcpMessage);
 }
 
