@@ -760,7 +760,9 @@ void MainWindow::updateUiProperties() {
     ui->discr2Edit->setText(QString::number(sliderValues.at(1) / 2.0) + "mV");
     double biasVoltage = biasCalibOffset + biasDacVoltage*biasCalibSlope;
     ui->biasVoltageDoubleSpinBox->setValue(biasVoltage);
+    ui->biasVoltageSlider->blockSignals(true);
     ui->biasVoltageSlider->setValue(100*biasVoltage/maxBiasVoltage);
+    ui->biasVoltageSlider->blockSignals(false);
     // equation:
     // UBias = c1*UDac + c0
     // (UBias - c0)/c1 = UDac
@@ -1031,6 +1033,7 @@ void MainWindow::onCalibUpdated(const QVector<CalibStruct>& items)
                   Qt::TextColorRole);
 */
     ui->biasControlTypeComboBox->setCurrentIndex((calibedBias)?1:0);
+//    sendRequest(biasVoltageRequestSig);
 }
 
 void MainWindow::on_biasControlTypeComboBox_currentIndexChanged(int index)
@@ -1053,4 +1056,5 @@ void MainWindow::on_biasControlTypeComboBox_currentIndexChanged(int index)
         ui->biasVoltageDoubleSpinBox->setMaximum(maxBiasVoltage);
         ui->biasVoltageDoubleSpinBox->setSingleStep(0.01);
     }
+    sendRequest(biasVoltageRequestSig);
 }
