@@ -7,6 +7,7 @@
 #include <qwt_plot_histogram.h>
 
 class QwtPlotHistogram;
+class Histogram;
 
 class CustomHistogram : public QwtPlot
 {
@@ -43,6 +44,7 @@ public:
 	QwtPlotHistogram* getHistogramPlot() { return fBarChart; }
     
     void setData(const QVector<QPointF>&);
+    void setData(const Histogram& hist);
 
     QString title = "Histogram";
 private:

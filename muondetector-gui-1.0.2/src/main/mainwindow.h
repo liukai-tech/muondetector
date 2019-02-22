@@ -17,6 +17,7 @@ struct GnssConfigStruct;
 class GnssSatellite;
 class CalibForm;
 struct UbxTimePulseStruct;
+class Histogram;
 
 namespace Ui {
 	class MainWindow;
@@ -60,7 +61,8 @@ signals:
 	void gpsFixReceived(quint8 val);
     void ubxUptimeReceived(quint32 val);
     void gpsTP5Received(const UbxTimePulseStruct& tp);
-	
+    void histogramReceived(const Histogram& h);
+
 public slots:
 	void receivedTcpMessage(TcpMessage tcpMessage);
     void receivedGpioRisingEdge(quint8 pin);
@@ -127,7 +129,7 @@ private:
 
     void updateUiProperties();
     int verbose = 0;
-    float biasDacVoltage = 0;
+    float biasDacVoltage = 0.;
     bool biasON, uiValuesUpToDate = false;
     quint8 pcaPortMask = 0;
     QVector<int> sliderValues = QVector<int>({0,0});

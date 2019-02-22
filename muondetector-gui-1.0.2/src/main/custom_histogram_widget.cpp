@@ -3,6 +3,7 @@
 #include <qwt_scale_engine.h>
 #include <qwt_samples.h>
 #include <numeric>
+#include <histogram.h>
 
 #include "custom_histogram_widget.h"
 
@@ -117,6 +118,18 @@ void CustomHistogram::setData(const QVector<QPointF>& samples)
 	}
 	replot();
 */
+}
+
+void CustomHistogram::setData(const Histogram &hist)
+{
+    fHistogramMap.clear();
+    fNrBins = hist.getNrBins();
+    fMinX=hist.getMin();
+    fMaxX=hist.getMax();
+    fUnderflow=hist.getUnderflow();
+    fOverflow=hist.getOverflow();
+    for (int i=0; i<fNrBins; i++) fHistogramMap[i]=hist.getBinContent(i);
+    update();
 }
 
 void CustomHistogram::update()

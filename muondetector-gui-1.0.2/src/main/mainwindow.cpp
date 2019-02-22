@@ -18,6 +18,7 @@
 #include <gpssatsform.h>
 #include <iostream>
 #include <histogram.h>
+#include "histogramdataform.h"
 
 using namespace std;
 
@@ -229,7 +230,14 @@ MainWindow::MainWindow(QWidget *parent) :
 */    
 	ui->tabWidget->addTab(satsTab,"GNSS/GPS Data");
 
-	//sendRequest(calibRequestSig);
+
+    histogramDataForm *histoTab = new histogramDataForm(this);
+//    connect(this, &MainWindow::setUiEnabledStates, satsTab, &GpsSatsForm::onUiEnabledStateChange);
+    connect(this, &MainWindow::histogramReceived, histoTab, &histogramDataForm::onHistogramReceived);
+    ui->tabWidget->addTab(histoTab,"Histograms");
+
+
+    //sendRequest(calibRequestSig);
 
     //settings->show();
 	// set menu bar actions
@@ -591,6 +599,12 @@ void MainWindow::receivedTcpMessage(TcpMessage tcpMessage) {
 	UbxTimePulseStruct tp;
 	*(tcpMessage.dStream) >> tp;
         emit gpsTP5Received(tp);
+        return;
+    }
+    if (msgID == histogramSig){
+    Histogram h;
+    *(tcpMessage.dStream) >> h;
+        emit histogramReceived(h);
         return;
     }
 }
