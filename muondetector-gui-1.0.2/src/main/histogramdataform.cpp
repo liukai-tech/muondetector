@@ -53,9 +53,14 @@ void histogramDataForm::on_tableWidget_cellClicked(int row, int column)
     if (it!=fHistoMap.end()) {
         ui->histoWidget->setTitle(name);
         ui->histoWidget->setData(*it);
+        ui->histoNameLabel->setText(QString::fromStdString(it->getName()));
+        ui->nrBinsLabel->setText(QString::number(it->getNrBins()));
         ui->nrEntriesLabel->setText(QString::number(it->getEntries()));
+        ui->minLabel->setText(QString::number(it->getMin()));
+        ui->maxLabel->setText(QString::number(it->getMax()));
         ui->underflowLabel->setText(QString::number(it->getUnderflow()));
         ui->overflowLabel->setText(QString::number(it->getOverflow()));
-        ui->meanLabel->setText(QString::number(it->getMean()));
+        ui->meanLabel->setText(QString::number(it->getMean(),'g',5)+QString::fromStdString(it->getUnit()));
+        ui->rmsLabel->setText(QString::number(it->getRMS(),'g',3)+QString::fromStdString(it->getUnit()));
     }
 }

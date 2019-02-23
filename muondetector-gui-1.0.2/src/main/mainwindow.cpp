@@ -76,13 +76,15 @@ QDataStream& operator << (QDataStream& out, const UbxTimePulseStruct& tp)
 
 QDataStream& operator >> (QDataStream& in, Histogram& h)
 {
-	QString name;
+    QString name,unit;
 	in >> name >> h.fMin >> h.fMax >> h.fUnderflow >> h.fOverflow >> h.fNrBins;
 	h.setName(name.toStdString());
 	h.clear();
 	for (int i=0; i<h.fNrBins; i++) {
 		in >> h.fHistogramMap[i];
 	}
+    in >> unit;
+    h.setUnit(unit.toStdString());
     return in;
 }
 
