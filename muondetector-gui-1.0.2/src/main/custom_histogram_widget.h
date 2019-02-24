@@ -18,18 +18,21 @@ public:
     ~CustomHistogram();
     void initialize();
     QwtPlotGrid *grid = nullptr;
-	//virtual void replot();
-	void update();
+    QString title = "Histogram";
+    //virtual void replot();
+
+public slots:
+    void update();
 	void clear();
 	void setStatusEnabled(bool status);
 	void setNrBins(int bins) { fNrBins = bins; clear(); }
-	int getNrBins() const;
+    int getNrBins() const { return fNrBins; }
 	void setXMin(double val);
 	double getXMin() const { return fMinX; }
 	void setXMax(double val);
 	double getXMax() const { return fMaxX; }
 	// log X scale not implemented yet	
-	void setLogX(bool);
+    //void setLogX(bool);
 	bool getLogX() const { return fLogX; }
     void setLogY(bool);
 	bool getLogY() const { return fLogY; }
@@ -46,7 +49,8 @@ public:
     void setData(const QVector<QPointF>&);
     void setData(const Histogram& hist);
 
-    QString title = "Histogram";
+private slots:
+    void popUpMenu(const QPoint &pos);
 private:
 //	QwtPlotBarChart* fBarChart;
 	QwtPlotHistogram* fBarChart = nullptr;

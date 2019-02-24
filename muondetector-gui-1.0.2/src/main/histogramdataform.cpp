@@ -53,6 +53,8 @@ void histogramDataForm::on_tableWidget_cellClicked(int row, int column)
     if (it!=fHistoMap.end()) {
         ui->histoWidget->setTitle(name);
         ui->histoWidget->setData(*it);
+        ui->histoWidget->setAxisTitle(QwtPlot::xBottom, QString::fromStdString(it->getUnit()));
+        ui->histoWidget->rescalePlot();
         ui->histoNameLabel->setText(QString::fromStdString(it->getName()));
         ui->nrBinsLabel->setText(QString::number(it->getNrBins()));
         ui->nrEntriesLabel->setText(QString::number(it->getEntries()));
@@ -60,7 +62,7 @@ void histogramDataForm::on_tableWidget_cellClicked(int row, int column)
         ui->maxLabel->setText(QString::number(it->getMax()));
         ui->underflowLabel->setText(QString::number(it->getUnderflow()));
         ui->overflowLabel->setText(QString::number(it->getOverflow()));
-        ui->meanLabel->setText(QString::number(it->getMean(),'g',5)+QString::fromStdString(it->getUnit()));
-        ui->rmsLabel->setText(QString::number(it->getRMS(),'g',3)+QString::fromStdString(it->getUnit()));
+        ui->meanLabel->setText(QString::number(it->getMean())+QString::fromStdString(it->getUnit()));
+        ui->rmsLabel->setText(QString::number(it->getRMS(),'g',4)+QString::fromStdString(it->getUnit()));
     }
 }

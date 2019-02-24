@@ -229,12 +229,6 @@ void Settings::on_ubxResetPushButton_clicked()
 }
 
 
-
-void Settings::on_setGnssConfigPushButton_clicked()
-{
-    writeGnssConfig();
-}
-
 void Settings::writeGnssConfig()
 {
     QVector<GnssConfigStruct> configList;

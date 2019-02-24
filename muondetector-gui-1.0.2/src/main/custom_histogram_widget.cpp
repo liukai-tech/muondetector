@@ -2,6 +2,7 @@
 #include <qwt.h>
 #include <qwt_scale_engine.h>
 #include <qwt_samples.h>
+#include <QMenu>
 #include <numeric>
 #include <histogram.h>
 
@@ -22,7 +23,6 @@ void CustomHistogram::initialize(){
 //       setAxisScaleEngine(QwtPlot::yLeft, new QwtLogScaleEngine());
 	setAxisAutoScale(QwtPlot::yLeft,true);
        //setAxisAutoScale(QwtPlot::yRight,true);
-
 	grid = new QwtPlotGrid();
     const QPen grayPen(Qt::gray);
     grid->setPen(grayPen);
@@ -35,7 +35,10 @@ void CustomHistogram::initialize(){
 	
 	fBarChart->setBrush(QBrush(Qt::darkBlue, Qt::SolidPattern));
 	fBarChart->attach( this );
-       
+
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this,SIGNAL(customContextMenuRequested(const QPoint &  )),this,SLOT(popUpMenu(const QPoint &)));
+
 	replot();
 	show();
 }
@@ -130,6 +133,24 @@ void CustomHistogram::setData(const Histogram &hist)
     fOverflow=hist.getOverflow();
     for (int i=0; i<fNrBins; i++) fHistogramMap[i]=hist.getBinContent(i);
     update();
+}
+
+void CustomHistogram::popUpMenu(const QPoint & pos)
+{
+    QMenu contextMenu(tr("Context menu"), this);
+
+    QAction action1("&Log Y", this);
+    action1.setCheckable(true);
+    action1.setChecked(false);
+    connect(&action1, &QAction::toggled, this, [this](bool checked){ this->setLogY(checked); this->update(); } );
+    contextMenu.addAction(&action1);
+    contextMenu.addSeparator();
+    QAction action2("&Clear", this);
+    connect(&action2, &QAction::triggered, this, &CustomHistogram::clear );
+    contextMenu.addAction(&action2);
+
+    contextMenu.exec(mapToGlobal(pos));
+//    contextMenu.popup(mapToGlobal(pos));
 }
 
 void CustomHistogram::update()

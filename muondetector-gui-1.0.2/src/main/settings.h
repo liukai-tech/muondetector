@@ -48,7 +48,6 @@ public slots:
 private slots:
     void onSettingsButtonBoxClicked(QAbstractButton *button);
     void on_ubxResetPushButton_clicked();
-    void on_setGnssConfigPushButton_clicked();
     void writeGnssConfig();
     void writeTpConfig();
 
