@@ -20,6 +20,7 @@ public:
     ~histogramDataForm();
 public slots:
     void onHistogramReceived(const Histogram& h);
+    void onUiEnabledStateChange(bool connected);
 
 private slots:
     void updateHistoTable();
@@ -29,6 +30,7 @@ private slots:
 private:
     Ui::histogramDataForm *ui;
     QMap<QString, Histogram> fHistoMap;
+    QString fCurrentHisto="";
 };
 
 #endif // HISTOGRAMDATAFORM_H

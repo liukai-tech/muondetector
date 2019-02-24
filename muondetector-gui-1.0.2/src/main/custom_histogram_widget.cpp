@@ -141,12 +141,13 @@ void CustomHistogram::popUpMenu(const QPoint & pos)
 
     QAction action1("&Log Y", this);
     action1.setCheckable(true);
-    action1.setChecked(false);
+    action1.setChecked(getLogY());
     connect(&action1, &QAction::toggled, this, [this](bool checked){ this->setLogY(checked); this->update(); } );
     contextMenu.addAction(&action1);
     contextMenu.addSeparator();
     QAction action2("&Clear", this);
-    connect(&action2, &QAction::triggered, this, &CustomHistogram::clear );
+//    connect(&action2, &QAction::triggered, this, &CustomHistogram::clear );
+    connect(&action2, &QAction::triggered, this,  [this](bool checked){ this->clear(); this->update(); });
     contextMenu.addAction(&action2);
 
     contextMenu.exec(mapToGlobal(pos));
@@ -158,7 +159,8 @@ void CustomHistogram::update()
 	//QwtPlot::replot();
 	//return;
 	if (!isEnabled()) return;
-    if (fHistogramMap.empty() || fNrBins<=1) { QwtPlot::replot(); return; }
+    if (fHistogramMap.empty() || fNrBins<=1) { fBarChart->detach(); QwtPlot::replot(); return; }
+    fBarChart->attach(this);
 	QVector<QwtIntervalSample> intervals;
 	double rangeX=fMaxX-fMinX;
 	double xBinSize = rangeX/(fNrBins-1);

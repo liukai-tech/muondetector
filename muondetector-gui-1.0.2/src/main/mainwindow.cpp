@@ -234,7 +234,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     histogramDataForm *histoTab = new histogramDataForm(this);
-//    connect(this, &MainWindow::setUiEnabledStates, satsTab, &GpsSatsForm::onUiEnabledStateChange);
+    connect(this, &MainWindow::setUiEnabledStates, histoTab, &histogramDataForm::onUiEnabledStateChange);
     connect(this, &MainWindow::histogramReceived, histoTab, &histogramDataForm::onHistogramReceived);
     ui->tabWidget->addTab(histoTab,"Histograms");
 
