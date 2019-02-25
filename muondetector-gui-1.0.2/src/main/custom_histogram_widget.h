@@ -51,6 +51,8 @@ public slots:
 
 private slots:
     void popUpMenu(const QPoint &pos);
+    void exportToFile();
+
 private:
 //	QwtPlotBarChart* fBarChart;
 	QwtPlotHistogram* fBarChart = nullptr;
