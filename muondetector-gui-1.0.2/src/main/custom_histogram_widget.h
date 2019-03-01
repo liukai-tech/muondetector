@@ -5,11 +5,12 @@
 #include <qwt_plot_grid.h>
 #include <qwt_series_data.h>
 #include <qwt_plot_histogram.h>
+#include <histogram.h>
 
 class QwtPlotHistogram;
 class Histogram;
 
-class CustomHistogram : public QwtPlot
+class CustomHistogram : public QwtPlot, public Histogram
 {
 	Q_OBJECT
 public:
@@ -25,24 +26,24 @@ public slots:
     void update();
 	void clear();
 	void setStatusEnabled(bool status);
-	void setNrBins(int bins) { fNrBins = bins; clear(); }
-    int getNrBins() const { return fNrBins; }
+//	void setNrBins(int bins) { fNrBins = bins; clear(); }
+//    int getNrBins() const { return fNrBins; }
 	void setXMin(double val);
-	double getXMin() const { return fMinX; }
+//    double getXMin() const { return fMinX; }
 	void setXMax(double val);
-	double getXMax() const { return fMaxX; }
+//	double getXMax() const { return fMaxX; }
 	// log X scale not implemented yet	
     //void setLogX(bool);
 	bool getLogX() const { return fLogX; }
     void setLogY(bool);
 	bool getLogY() const { return fLogY; }
 	void rescalePlot();
-	void fill(double x, double mult = 1.);
-	void setBinContent(int bin, double value);
-	double getBinContent(int bin) const;
-	double getUnderflow() const { return fUnderflow; }
-	double getOverflow() const { return fOverflow; }
-	long int getEntries();
+//	void fill(double x, double mult = 1.);
+//	void setBinContent(int bin, double value);
+//	double getBinContent(int bin) const;
+//	double getUnderflow() const { return fUnderflow; }
+//	double getOverflow() const { return fOverflow; }
+//	long int getEntries();
 
 	QwtPlotHistogram* getHistogramPlot() { return fBarChart; }
     
@@ -56,16 +57,16 @@ private slots:
 private:
 //	QwtPlotBarChart* fBarChart;
 	QwtPlotHistogram* fBarChart = nullptr;
-	int xValue2Bin(double value);
-
+//	int xValue2Bin(double value);
+//  double bin2Value(int bin);
 	bool fLogY=false;
 	bool fLogX=false;
-	int fNrBins=100;
-	double fMinX=0.0;
-	double fMaxX=1.0;
-	double fOverflow=0;
-	double fUnderflow=0;
-	QMap<int, double> fHistogramMap;
+//	int fNrBins=100;
+//	double fMinX=0.0;
+//	double fMaxX=1.0;
+//	double fOverflow=0;
+//	double fUnderflow=0;
+    QMap<int, double> fHistogramMap;
 };
 
 #endif // CUSTOMHISTOGRAM_H

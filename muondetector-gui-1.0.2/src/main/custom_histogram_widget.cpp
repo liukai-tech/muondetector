@@ -44,13 +44,20 @@ void CustomHistogram::initialize(){
 	replot();
 	show();
 }
-
+/*
 int CustomHistogram::xValue2Bin(double value)
 {
 	double range=fMaxX-fMinX;
 	if (range<=0.) return -1;	
-	int bin=value/range*fNrBins+0.5;
+    int bin=(value-fMinX)/range*fNrBins+0.5;
 	return bin;
+}
+
+double CustomHistogram::bin2Value(int bin) {
+    double range=fMaxX-fMinX;
+    if (range<=0.) return -1;
+    double value=range*bin/fNrBins+fMinX;
+    return value;
 }
 
 void CustomHistogram::fill(double x, double mult)
@@ -77,25 +84,26 @@ double CustomHistogram::getBinContent(int bin) const
 	if (bin>=0 && bin<fNrBins) return fHistogramMap[bin];
 	else return double();
 }
-
-long int CustomHistogram::getEntries()
-{
-	double sum = fUnderflow+fOverflow;
-	foreach (double value, fHistogramMap) sum+=value;	
-
-/*
-	// this should also work, but it doesn't compile. reason unclear
-	for (const auto &entry : fHistogramMap) {
-		sum+=entry.second;
-	}
-
-	// this should also work, but it doesn't compile. reason unclear
-	sum += std::accumulate(fHistogramMap.begin(), fHistogramMap.end(), 0.,
-                                          [](double previous, const QPair<const int, double>& p)
-                                          { return previous + p.second; });
 */
-	return (long int)sum;
-}
+
+//long int CustomHistogram::getEntries()
+//{
+//	double sum = fUnderflow+fOverflow;
+//	foreach (double value, fHistogramMap) sum+=value;
+
+///*
+//	// this should also work, but it doesn't compile. reason unclear
+//	for (const auto &entry : fHistogramMap) {
+//		sum+=entry.second;
+//	}
+
+//	// this should also work, but it doesn't compile. reason unclear
+//	sum += std::accumulate(fHistogramMap.begin(), fHistogramMap.end(), 0.,
+//                                          [](double previous, const QPair<const int, double>& p)
+//                                          { return previous + p.second; });
+//*/
+//	return (long int)sum;
+//}
 
 void CustomHistogram::setData(const QVector<QPointF>& samples)
 {
@@ -129,8 +137,8 @@ void CustomHistogram::setData(const Histogram &hist)
 {
     fHistogramMap.clear();
     fNrBins = hist.getNrBins();
-    fMinX=hist.getMin();
-    fMaxX=hist.getMax();
+    fMin=hist.getMin();
+    fMax=hist.getMax();
     fUnderflow=hist.getUnderflow();
     fOverflow=hist.getOverflow();
     for (int i=0; i<fNrBins; i++) fHistogramMap[i]=hist.getBinContent(i);
@@ -170,24 +178,31 @@ void CustomHistogram::exportToFile() {
             "Portable Network Graphics file (*.png);;"
             "Bitmap file (*.bmp);;"
             "Portable Document Format (*.pdf);;"
-            "Scalable Vector Graphics Format (*.svg)");
+            "Scalable Vector Graphics Format (*.svg);;"
+            "ASCII raw data (*.txt)");
     QString filter;							// Type of filter
     QString jpegExt=".jpeg", pngExt=".png", tifExt=".tif", bmpExt=".bmp", tif2Ext="tiff";		// Suffix for the files
     QString pdfExt=".pdf", svgExt=".svg";
+    QString txtExt=".txt";
     QString suggestedName="";
-    QString fn = QFileDialog::getSaveFileName(this,tr("Save Image"),
+    QString fn = QFileDialog::getSaveFileName(this,tr("Export Histogram"),
                                                   suggestedName,types,&filter);
 
-    if ( !fn.isEmpty() ) {						// If filename is not a null
-        if (fn.contains(jpegExt)) {				// Remove file extension is already there
+    if ( !fn.isEmpty() ) {						// If filename is not null
+        if (fn.contains(jpegExt)) {				// Remove file extension if already there
             fn.remove(jpegExt);
-        }
-        else if (fn.contains(pngExt)) {
+        } else if (fn.contains(pngExt)) {
             fn.remove(pngExt);
-        }
-        else if (fn.contains(bmpExt)) {
+        } else if (fn.contains(bmpExt)) {
             fn.remove(bmpExt);
+        } else if (fn.contains(pdfExt)) {
+            fn.remove(pdfExt);
+        } else if (fn.contains(svgExt)) {
+            fn.remove(svgExt);
+        } else if (fn.contains(txtExt)) {
+            fn.remove(txtExt);
         }
+
         if (filter.contains(jpegExt)) {				// OR, Test to see if jpeg and save
             fn+=jpegExt;
             qPix.save( fn, "JPEG" );
@@ -210,6 +225,17 @@ void CustomHistogram::exportToFile() {
             QwtPlotRenderer renderer(this);
             renderer.renderDocument(this, fn, "svg", QSizeF(297/2,210/2),72);
         }
+        if (filter.contains(txtExt)) {
+            fn+=txtExt;
+            // todo: export histo in asci raw data format
+            QFile file(fn);
+            if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+            QTextStream out(&file);
+
+            for (int i=0; i<fNrBins; i++) {
+                out << bin2Value(i) << "  " << fHistogramMap[i] << "\n";
+            }
+        }
     }
 }
 
@@ -221,12 +247,13 @@ void CustomHistogram::update()
     if (fHistogramMap.empty() || fNrBins<=1) { fBarChart->detach(); QwtPlot::replot(); return; }
     fBarChart->attach(this);
 	QVector<QwtIntervalSample> intervals;
-	double rangeX=fMaxX-fMinX;
+    double rangeX=fMax-fMin;
 	double xBinSize = rangeX/(fNrBins-1);
 	double max=0;
 	for (int i=0; i<fNrBins; i++) {
 		if (fHistogramMap[i]>max) max=fHistogramMap[i];
-		double xval = fMinX+(fMaxX-fMinX)*i/(fNrBins-1);
+        //double xval = fMinX+(fMaxX-fMinX)*i/(fNrBins-1);
+        double xval=bin2Value(i);
 		QwtIntervalSample interval(fHistogramMap[i]+1e-12, xval-xBinSize/2., xval+xBinSize/2.);
 		intervals.push_back(interval);
 	}
@@ -308,19 +335,19 @@ void CustomHistogram::setLogY(bool logscale){
 
 void CustomHistogram::setXMin(double val)
 {
-	fMinX = val;
+    fMin = val;
 	rescalePlot();
 }
 
 void CustomHistogram::setXMax(double val)
 {
-	fMaxX = val; 
+    fMax = val;
 	rescalePlot();
 }
 
 void CustomHistogram::rescalePlot()
 {
-	double margin = 0.05*(fMaxX	- fMinX);
-	setAxisScale(QwtPlot::xBottom,fMinX-margin, fMaxX+margin);
+    double margin = 0.05*(fMax	- fMin);
+    setAxisScale(QwtPlot::xBottom,fMin-margin, fMax+margin);
 }
 
