@@ -44,66 +44,6 @@ void CustomHistogram::initialize(){
 	replot();
 	show();
 }
-/*
-int CustomHistogram::xValue2Bin(double value)
-{
-	double range=fMaxX-fMinX;
-	if (range<=0.) return -1;	
-    int bin=(value-fMinX)/range*fNrBins+0.5;
-	return bin;
-}
-
-double CustomHistogram::bin2Value(int bin) {
-    double range=fMaxX-fMinX;
-    if (range<=0.) return -1;
-    double value=range*bin/fNrBins+fMinX;
-    return value;
-}
-
-void CustomHistogram::fill(double x, double mult)
-{
-	if (!isEnabled()) return;
-	int bin=xValue2Bin(x);
-	if (bin<0) {
-		fUnderflow+=mult;
-		return;
-	} else if (bin>=fNrBins) {
-		fOverflow+=mult;
-		return;
-	}
-	fHistogramMap[bin]+=mult;
-}
-
-void CustomHistogram::setBinContent(int bin, double value)
-{
-	if (bin>=0 && bin<fNrBins) fHistogramMap[bin]=value;
-}
-
-double CustomHistogram::getBinContent(int bin) const
-{
-	if (bin>=0 && bin<fNrBins) return fHistogramMap[bin];
-	else return double();
-}
-*/
-
-//long int CustomHistogram::getEntries()
-//{
-//	double sum = fUnderflow+fOverflow;
-//	foreach (double value, fHistogramMap) sum+=value;
-
-///*
-//	// this should also work, but it doesn't compile. reason unclear
-//	for (const auto &entry : fHistogramMap) {
-//		sum+=entry.second;
-//	}
-
-//	// this should also work, but it doesn't compile. reason unclear
-//	sum += std::accumulate(fHistogramMap.begin(), fHistogramMap.end(), 0.,
-//                                          [](double previous, const QPair<const int, double>& p)
-//                                          { return previous + p.second; });
-//*/
-//	return (long int)sum;
-//}
 
 void CustomHistogram::setData(const QVector<QPointF>& samples)
 {
@@ -227,7 +167,7 @@ void CustomHistogram::exportToFile() {
         }
         if (filter.contains(txtExt)) {
             fn+=txtExt;
-            // todo: export histo in asci raw data format
+            // export histo in asci raw data format
             QFile file(fn);
             if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
             QTextStream out(&file);
@@ -252,7 +192,6 @@ void CustomHistogram::update()
 	double max=0;
 	for (int i=0; i<fNrBins; i++) {
 		if (fHistogramMap[i]>max) max=fHistogramMap[i];
-        //double xval = fMinX+(fMaxX-fMinX)*i/(fNrBins-1);
         double xval=bin2Value(i);
 		QwtIntervalSample interval(fHistogramMap[i]+1e-12, xval-xBinSize/2., xval+xBinSize/2.);
 		intervals.push_back(interval);
@@ -263,38 +202,6 @@ void CustomHistogram::update()
 	}
 	replot();
 }
-
-/*
-void CustomHistogram::update()
-{
-	//QwtPlot::replot();
-	//return;
-	if (!isEnabled()) return;
-	if (fHistogramMap->empty() || fNrBins<=1) { QwtPlot::replot(); return; } 
-	QVector<QPointF> points;
-	points.clear();
-	//intervals.clear();
-	double rangeX=fMaxX-fMinX;
-	double xBinSize = rangeX/(fNrBins-1);
-	double max=0;
-	for (int i=0; i<fNrBins; i++) {
-		if ((*fHistogramMap)[i]>max) max=(*fHistogramMap)[i];
-		double xval = fMinX+(fMaxX-fMinX)*i/fNrBins;
-		QPointF point;
-		point.rx()=xval;
-		point.ry()=(double)((*fHistogramMap)[i])+1e-12;
-		points.push_back(point);
-	}
-//	if (points.size() && fBarChart != nullptr) fBarChart->setSamples(points);
-	if (points.size() && fBarChart != nullptr) setData(points);
-//	fBarChart->setSamples(samples);
-	if (fLogY) {
-		setAxisScale(QwtPlot::yLeft,0.1, 1.5*max);
-	}
-//	QwtPlot::replot();
-	replot();
-}
-*/
 
 void CustomHistogram::clear()
 {
@@ -350,4 +257,3 @@ void CustomHistogram::rescalePlot()
     double margin = 0.05*(fMax	- fMin);
     setAxisScale(QwtPlot::xBottom,fMin-margin, fMax+margin);
 }
-
