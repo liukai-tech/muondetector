@@ -11,6 +11,11 @@ namespace Ui {
 class GpsSatsForm;
 }
 
+struct SatHistoryPoint {
+    QPointF pos;
+    QColor color;
+};
+
 class GpsSatsForm : public QWidget
 {
     Q_OBJECT
@@ -35,7 +40,8 @@ public slots:
 private:
     Ui::GpsSatsForm *ui;
     QVector<QPointF> iqTrack;
-    QMap<int, QVector<QPointF>> satTracks;
+//    QMap<int, QVector<QPointF>> satTracks;
+    QMap<int, QVector<SatHistoryPoint>> satTracks;
 
 };
 
