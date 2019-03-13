@@ -106,11 +106,13 @@ void GpsSatsForm::onSatsReceived(const QVector<GnssSatellite> &satlist)
             int satId = satlist[i].fGnssId*1000 + satlist[i].fSatId;
             QPointF currPoint(xpos+satPosPixmapSize/2,ypos+satPosPixmapSize/2);
             QPointF lastPoint;
+/*
             for (int i=0; i<satTracks[satId].size(); i++) {
                 satPosPainter.setPen(satTracks[satId][i].color);
                 //satPosPainter.setBrush(satTracks[satId][i].color);
                 satPosPainter.drawPoint(satTracks[satId][i].pos);
             }
+*/
             if (satTracks[satId].size()) {
                 lastPoint=satTracks[satId].last().pos;
             }
@@ -134,6 +136,16 @@ void GpsSatsForm::onSatsReceived(const QVector<GnssSatellite> &satlist)
             if (satlist[i].fUsed) satPosPainter.drawEllipse(currPoint,3.5,3.5);
         }
     }
+
+    // draw the sat tracks
+    foreach (QVector<SatHistoryPoint> sat, satTracks) {
+        for (int i=0; i<sat.size(); i++) {
+            satPosPainter.setPen(sat[i].color);
+            //satPosPainter.setBrush(satTracks[satId][i].color);
+            satPosPainter.drawPoint(sat[i].pos);
+        }
+    }
+
     ui->satPosLabel->setPixmap(satPosPixmap);
 
     int N=newlist.size();
