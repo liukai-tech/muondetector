@@ -112,21 +112,26 @@ void PlotCustom::plotSamples(QVector<QPointF>& samples, QwtPlotCurve& curve){
 }
 
 void PlotCustom::plotXorSamples(QVector<QPointF>& xorSamples){
+    setPreset("");
     plotSamples(xorSamples,xorCurve);
 }
 
 void PlotCustom::plotAndSamples(QVector<QPointF>& andSamples){
+    setPreset("");
     plotSamples(andSamples,andCurve);
 }
 
 void PlotCustom::setPreset(QString preset){
-    if (preset=="seconds"){
+    if (!preset.isEmpty()){
+        xAxisPreset = preset;
+    }
+    if (xAxisPreset=="seconds"){
         setAxisScaleDraw(QwtPlot::xBottom, new QwtScaleDraw());
     }
-    if (preset=="hh:mm:ss"){
+    if (xAxisPreset=="hh:mm:ss"){
         setAxisScaleDraw(QwtPlot::xBottom, new TimeScaleDraw(QTime(0,0,0,0),true));
     }
-    if (preset=="time"){
+    if (xAxisPreset=="time"){
         setAxisScaleDraw(QwtPlot::xBottom, new TimeScaleDraw(QTime::currentTime(),false));
     }
     replot();
