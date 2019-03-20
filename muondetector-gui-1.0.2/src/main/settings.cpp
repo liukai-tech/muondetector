@@ -110,7 +110,7 @@ void Settings::onSettingsButtonBoxClicked(QAbstractButton *button){
         }
         settingsUi->settingsButtonBox->button(QDialogButtonBox::Apply)->setDisabled(true);
         settingsUi->settingsButtonBox->button(QDialogButtonBox::Discard)->setDisabled(true);
-
+        settingsUi->ubloxSignalStates->blockSignals(false);
     }
     if (button == settingsUi->settingsButtonBox->button(QDialogButtonBox::Discard)){
         onTP5Received(fTpConfig);
@@ -131,7 +131,8 @@ void Settings::onUiEnabledStateChange(bool connected){
         this->setEnabled(true);
         settingsUi->settingsButtonBox->button(QDialogButtonBox::Discard)->setDisabled(true);
         settingsUi->settingsButtonBox->button(QDialogButtonBox::Apply)->setDisabled(true);
-    }else{
+        settingsUi->ubloxSignalStates->blockSignals(false);
+    } else {
         settingsUi->ubloxSignalStates->clearContents();
         settingsUi->ubloxSignalStates->setRowCount(0);
         settingsUi->ubloxSignalStates->blockSignals(true);
