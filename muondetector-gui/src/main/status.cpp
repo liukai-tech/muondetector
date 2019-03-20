@@ -5,7 +5,7 @@
 #include <QTime>
 
 
-static int rateSecondsBuffered = 60*120; // 120 min
+static quint64 rateSecondsBuffered = 60*120; // 120 min
 static const int MAX_BINS = 200; // bins in pulse height histogram
 static const float MAX_ADC_VOLTAGE = 4.0;
 
@@ -22,7 +22,11 @@ Status::Status(QWidget *parent) :
 	statusUi->pulseHeightHistogram->setLogY(false);
 
     statusUi->ratePlotPresetComboBox->addItems(QStringList() << "seconds" << "hh:mm:ss" << "time");
-    statusUi->ratePlotBufferEdit->setText(QTime(0,0,0,0).addSecs(rateSecondsBuffered).toString());
+    statusUi->ratePlotBufferEdit->setText(QString("%1:%2:%3:%4")
+                                          .arg(rateSecondsBuffered/(3600*24),2,10,QChar('0'))
+                                          .arg((rateSecondsBuffered%(3600*24))/3600,2,10,QChar('0'))
+                                          .arg((rateSecondsBuffered%(3600))/60,2,10,QChar('0'))
+                                          .arg(rateSecondsBuffered%60,2,10,QChar('0')));
 
     connect(statusUi->ratePlotBufferEdit, &QLineEdit::editingFinished, this, [this](){this->setRateSecondsBuffered(statusUi->ratePlotBufferEdit->text());});
     connect(statusUi->ratePlotPresetComboBox, &QComboBox::currentTextChanged, statusUi->ratePlot, &PlotCustom::setPreset);
@@ -104,9 +108,13 @@ void Status::onGpioRatesReceived(quint8 whichrate, QVector<QPointF> rates){
 
 void Status::setRateSecondsBuffered(const QString& bufferTime){
     QStringList values = bufferTime.split(':');
-    int secs = 0;
-    if (values.size()>3){
-        statusUi->ratePlotBufferEdit->setText(QTime(0,0,0,0).addSecs(rateSecondsBuffered).toString());
+    quint64 secs = 0;
+    if (values.size()>4){
+        statusUi->ratePlotBufferEdit->setText(QString("%1:%2:%3:%4")
+                                              .arg(rateSecondsBuffered/(3600*24),2,10,QChar('0'))
+                                              .arg((rateSecondsBuffered%(3600*24))/3600,2,10,QChar('0'))
+                                              .arg((rateSecondsBuffered%(3600))/60,2,10,QChar('0'))
+                                              .arg(rateSecondsBuffered%60,2,10,QChar('0')));
         return;
     }
     for (int i = values.size()-1; i >= 0; i--){
@@ -120,9 +128,16 @@ void Status::setRateSecondsBuffered(const QString& bufferTime){
         if (i == values.size()-3){
             secs += 3600*values.at(i).toInt();
         }
+        if (i == values.size()-4){
+            secs += 3600*24*values.at(i).toInt();
+        }
     }
     rateSecondsBuffered = secs;
-    statusUi->ratePlotBufferEdit->setText(QTime(0,0,0,0).addSecs(rateSecondsBuffered).toString());
+    statusUi->ratePlotBufferEdit->setText(QString("%1:%2:%3:%4")
+                                          .arg(rateSecondsBuffered/(3600*24),2,10,QChar('0'))
+                                          .arg((rateSecondsBuffered%(3600*24))/3600,2,10,QChar('0'))
+                                          .arg((rateSecondsBuffered%(3600))/60,2,10,QChar('0'))
+                                          .arg(rateSecondsBuffered%60,2,10,QChar('0')));
 }
 
 void Status::clearRatePlot()

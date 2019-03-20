@@ -21,11 +21,12 @@ public:
 
     const QString title = "Rate Statistics";
 public slots:
-    void setPreset(QString preset);
+    void setPreset(QString preset = "");
     void setStatusEnabled(bool status);
 
 private:
     void initialize();
+    QString xAxisPreset = "seconds";
     void plotSamples(QVector<QPointF>& samples, QwtPlotCurve& curve);
     int plotPreset = 0;
     QwtPlotGrid grid;

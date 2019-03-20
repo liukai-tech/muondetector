@@ -2,7 +2,7 @@ QT -= gui
 QT += core
 QT += network
 QT += serialport
-VERSION = 1.0.2
+VERSION = 1.0.3
 CONFIG += c++11 console
 CONFIG -= app_bundle
 
@@ -28,7 +28,7 @@ INCLUDEPATH +=  . \
     main \
     main/i2c
 
-INCLUDEPATH += ../../muondetector-shared-1.0.2/src/
+INCLUDEPATH += ../../muondetector-shared/src/
 
 LIBS += -L/usr/lib/muondetector-shared -lmuondetector-shared
 DEPENDPATH += /usr/lib/muondetector-shared
@@ -45,11 +45,13 @@ SOURCES += main/main.cpp \
     main/i2c/i2cdevices.cpp \
     main/i2c/custom_i2cdetect.c \
     main/i2c/i2cbusses.c \
+    main/i2c/Adafruit_GFX.cpp \
     main/pigpiodhandler.cpp \
     main/daemon.cpp \
     main/custom_io_operators.cpp \
     main/filehandler.cpp \
-    main/calibration.cpp
+    main/calibration.cpp \
+    main/i2c/glcdfont.c
 
 HEADERS += \
 #    main/gnsssatellite.h \
@@ -60,6 +62,7 @@ HEADERS += \
     main/i2c/custom_i2cdetect.h \
     main/i2c/i2cbusses.h \
     main/i2c/i2cdevices.h \
+    main/i2c/Adafruit_GFX.h \
 #   main/i2c/linux/i2c-dev.h \
     main/pigpiodhandler.h \
     main/daemon.h \
