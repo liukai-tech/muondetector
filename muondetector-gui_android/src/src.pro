@@ -51,8 +51,8 @@ INCLUDEPATH += /usr/local/qwt-6.1.3/include/
 INCLUDEPATH += /usr/local/include/qwt/
 
 
-android:LIBS += $(PWD)/libs/arm64-v8a/libqwt.so
-android:LIBS += $(PWD)/libs/arm64-v8a/libmuondetector-shared.so
+android:LIBS += $$_PRO_FILE_PWD_/android/libs/arm64-v8a/libqwt.so
+android:LIBS += $$_PRO_FILE_PWD_/android/libs/arm64-v8a/libmuondetector-shared.so
 
 #unix:INCLUDEPATH += /usr/lib/muondetector-shared
 #unix:LIBS += -L/usr/lib -L/usr/local/lib -L/usr/local/qwt-6.1.3/lib -lqwt-qt5
@@ -108,9 +108,9 @@ OTHER_FILES += \
     $$(PWD)/assets/qml/mymap.qml
     android/AndroidManifest.xml
 
-ANDROID_EXTRA_LIBS += $$(PWD)/libs/arm64-v8a/libqwt.so \
-                      $$(PWD)/libs/arm64-v8a/libmuondetector-shared.so
-ANDROID_EXTRA_PLUGINS += $$(PWD)/assets/qml/
+ANDROID_EXTRA_LIBS += $$_PRO_FILE_PWD_/android/libs/arm64-v8a/libqwt.so \
+                      $$_PRO_FILE_PWD_/android/libs/arm64-v8a/libmuondetector-shared.so
+ANDROID_EXTRA_PLUGINS += $$_PRO_FILE_PWD_/android/assets/qml/
 
 DISTFILES += android/AndroidManifest.xml \
              android/res/drawable-hdpi/icon.png \
