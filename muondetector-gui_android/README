@@ -1,0 +1,3 @@
+How to compile for android:
+1. Download Java JDK, Android SDK (in Android Studio) and set SDK up using Android Studio. Download Android NDK there.
+2. Use QtCreator to set up compiler kit for Android then compile
