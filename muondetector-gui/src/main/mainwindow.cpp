@@ -5,7 +5,7 @@
 #include <QKeyEvent>
 #include <QDebug>
 #include <QErrorMessage>
-#include <gnsssatellite.h>
+//#include <gnsssatellite.h>
 #include <ublox_structs.h>
 #include <settings.h>
 #include <status.h>
@@ -21,28 +21,6 @@
 
 using namespace std;
 
-/*
-QDataStream & operator >> (QDataStream& in, CalibStruct& calib)
-{
-	QString s1,s2,s3;
-	quint16 u;
-	in >> s1 >> s2;
-	in >> u;
-	in >> s3;
-	calib.name = s1.toStdString();
-	calib.type = s2.toStdString();
-	calib.address = (uint16_t)u;
-	calib.value = s3.toStdString();
-	return in;
-}
-
-QDataStream& operator << (QDataStream& out, const CalibStruct& calib)
-{
-    out << QString::fromStdString(calib.name) << QString::fromStdString(calib.type)
-     << (quint16)calib.address << QString::fromStdString(calib.value);
-    return out;
-}
-*/
 
 QDataStream& operator >> (QDataStream& in, GnssSatellite& sat)
 {
@@ -134,6 +112,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	xorTimer.setInterval(timerInterval);
 	connect(&andTimer, &QTimer::timeout, this, &MainWindow::resetAndHit);
 	connect(&xorTimer, &QTimer::timeout, this, &MainWindow::resetXorHit);
+	
+	ui->ANDHit->setFocusPolicy(Qt::NoFocus);
+	ui->XORHit->setFocusPolicy(Qt::NoFocus);
 
     // set timer for automatic rate poll
     if (automaticRatePoll){
@@ -145,7 +126,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     // set mainwindow
-    //connect(ui->saveThresholdsButton, &QPushButton, this, &MainWindow::on_saveThresholdsButton_clicked);
+    //connect(ui->saveDacButton, &QPushButton, this, &MainWindow::on_saveThresholdsButton_clicked);
 
     // set all tabs
     ui->tabWidget->removeTab(0);
@@ -730,6 +711,7 @@ void MainWindow::onHistogramCleared(QString histogramName){
     TcpMessage tcpMessage(histogramClearSig);
     *(tcpMessage.dStream) << histogramName;
     emit sendTcpMessage(tcpMessage);
+//	qDebug()<<"received signal in slot MainWindow::onHistogramCleared("<<histogramName<<")";
 }
 
 void MainWindow::onSetGnssConfigs(const QVector<GnssConfigStruct>& configList){
@@ -1049,7 +1031,7 @@ float MainWindow::parseValue(QString text) {
 	return value;
 }
 
-void MainWindow::on_saveThresholdsButton_clicked()
+void MainWindow::on_saveDacButton_clicked()
 {
     TcpMessage tcpMessage(dacSetEepromSig);
     emit sendTcpMessage(tcpMessage);
