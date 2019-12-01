@@ -11,6 +11,7 @@ import plotly.tools as tls
 import plotly.graph_objs as go
 import plotly.io as pio
 import datetime as dt
+import time
 pio.templates.default = "none" # IMPORTANT, otherwise plotly would use it's own (ugly) style set
 import ipywidgets as widgets
 from ipywidgets import interact, interact_manual, interactive, fixed
@@ -88,7 +89,9 @@ def scatplot(dataframe,
              t_cut = 10,
              yrange = 100
             ):
-    
+
+    # Some style features
+    hist_linewidth = 3
     #coincidence cut
     data = dataframe[name]
     t_cut = t_cut*1e3 # in ns
@@ -104,52 +107,160 @@ def scatplot(dataframe,
         xdata1 = [(dt.datetime.fromtimestamp(data.ts[index])) for index, rows in data.ts.iteritems()] 
         xdata2 = [(dt.datetime.fromtimestamp(data_cut.ts[index])) for index, rows in data_cut.ts.iteritems()]
         xdata3 = [(dt.datetime.fromtimestamp(x_prepared[i])) for i in np.arange(0,len(x_prepared),1)]
+        xaxis_type = "date"
     else: 
         xdata1 = data.ts
         xdata2 = data_cut.ts
         xdata3 = x_prepared
-    # Uncut data
+        xaxis_type = "-"
+
+    fig = go.FigureWidget()
     trace1 = go.Scattergl( # scattergl for increased speed!
-        x = xdata1, 
-        y = data.tdiff,
-        mode = 'markers',
-        marker_color = colors_df['Fall_rgb'][1],
-        marker_size = 5,
-        name = "Uncut"
-    )
-    # Cut data
+            x = xdata1, 
+            y = data.tdiff,
+            mode = 'markers',
+            marker_color = colors_df['Fall_rgb'][1], 
+            marker_size = 5,
+            name = "Uncut"
+        )
+        # Cut data
     trace2 = go.Scattergl( # scattergl for increased speed!
-        x = xdata2,
-        y = data_cut.tdiff,
-        mode = 'markers',
-#         marker_color = 'rgb(0,176,246)',
-        marker_color = colors_df['Fall_rgb'][0],
-        marker_size = 10,
-        name = "Cut"
+            x = xdata2,
+            y = data_cut.tdiff,
+            mode = 'markers',
+    #         marker_color = 'rgb(0,176,246)',
+            marker_color = colors_df['Fall_rgb'][0],
+            marker_size = 10,
+            name = "Cut",
     )
     trace3 = go.Scatter(
-        x = xdata3,
-        y = np.append(cut_upper,cut_lower),
-        fill='toself',
-        fillcolor=colors_df['Fall_rgba'][0],
-        line_color='rgba(255,255,255,0)',
-        showlegend=False,
-        name='Fair',
+            x = xdata3,
+            y = np.append(cut_upper,cut_lower),
+            fill='toself',
+            fillcolor=colors_df['Fall_rgba'][0],
+            line_color='rgba(255,255,255,0)',
+            showlegend=False,
+            name='Fair',
     )
-    
+
+
+    hist11 = go.Histogram(x=xdata1, name='x density', 
+                          marker=dict(
+                              color=colors_df['Fall_rgb'][1], 
+                              opacity=0.7, 
+                              line=dict(
+                                color=colors_df['Fall_rgb'][1],
+                                width=hist_linewidth
+                              )
+                          ),
+                          yaxis='y2'
+                         )
+    hist12 = go.Histogram(y=data.tdiff, name='y density', 
+                          marker=dict(
+                              color=colors_df['Fall_rgb'][1], 
+                              opacity=0.7, 
+                              line=dict(
+                                color=colors_df['Fall_rgb'][1],
+                                width=hist_linewidth
+                              )
+                          ),
+                          xaxis='x2'
+                         )
+    hist21 = go.Histogram(x=xdata2, name='x density', 
+                          marker=dict(
+                              color=colors_df['Fall_rgb'][0], 
+                              opacity=0.7, 
+                              line=dict(
+                                color=colors_df['Fall_rgb'][0],
+                                width=hist_linewidth
+                              )
+                          ),
+                          yaxis='y2'
+                         )
+    hist22 = go.Histogram(y=data.tdiff, name='y density', 
+                          marker=dict(
+                              color=colors_df['Fall_rgb'][0], 
+                              opacity=0.7, 
+                              line=dict(
+                                color=colors_df['Fall_rgb'][0],
+                                width=hist_linewidth
+                              )
+                          ),
+                          xaxis='x2'
+                         )
+
     # Data to plot
-    plot_data = [trace1, trace2, trace3]
+    plot_data = [trace1, trace2, trace3, hist11, hist12, hist21, hist22]
 
     layout = dict(title = 'Time Distribution Plot',
-                  yaxis = dict(zeroline = True, mirror=True, ticks='outside', showline=True, 
-                               showexponent = 'all', exponentformat = 'e', range=[-yrange*1e3, yrange*1e3], 
-                               title="Time Difference [ns]"),
-                  xaxis = dict(zeroline = True, mirror=True, ticks='outside', showline=True,
-                               title = "Unix Timestamp", type = "date"),
+                  yaxis = dict(mirror=True, ticks='inside', showline=True, 
+                               showexponent = 'all', exponentformat = 'e', range=[-100000, 100000], 
+                               title="Time Difference [ns]",
+                               domain=[0, 0.85], showgrid=True, gridwidth=2, zeroline=True),
+                  xaxis = dict(zeroline = False, mirror=True, ticks='inside', showline=True,
+                               title = "Unix Timestamp", type = xaxis_type,
+                               domain=[0, 0.85], showgrid=True, gridwidth=2),
                   xaxis_rangeslider_visible=False,
-                  xaxis_tickformat = '%d %B <br>%Y<br>%H:%M:%S'
+                  xaxis_tickformat = '%d %B <br>%Y<br>%H:%M:%S',
+                  showlegend=True,
+                  margin=dict(t=50),
+                  hovermode='closest',
+                  bargap=0,
+                  xaxis2=dict(
+                      domain=[0.85, 1], showgrid=True, gridwidth=2, zeroline=False,
+                      mirror=True,
+                      ticks='inside',
+                      showline=True,
+                    title='Y-Projection',
+                  ),
+                  yaxis2=dict(
+                      domain=[0.85, 1], showgrid=True, gridwidth=2, zeroline=False,
+                      mirror=True,
+                      ticks='inside',
+                      showline=True,
+                      title='X-Projection',
+                  ),
+                  height=600,
                  )
 
-    fig = dict(data=plot_data, layout=layout)
-        
-    py.iplot(fig)
+    def do_zoom(layout, xaxis_range, yaxis_range):
+        # Reconvert xaxis to timestamp format for comparison with data
+        if conv_date:
+            # Check the date format given by xaxis_range
+            if (len(xaxis_range[0]) < 16):
+                xaxis_range0 = xaxis_range[0] + " 00:00"
+            else:
+                xaxis_range0 = xaxis_range[0]
+            if (len(xaxis_range[1]) < 16):
+                xaxis_range1 = xaxis_range[1] + " 00:00"
+            else:
+                xaxis_range1 = xaxis_range[1]
+            # Convert to timestamp
+            xaxis_range0_ts = time.mktime(dt.datetime.strptime(xaxis_range0[:16], "%Y-%m-%d %H:%M").timetuple())
+            xaxis_range1_ts = time.mktime(dt.datetime.strptime(xaxis_range1[:16], "%Y-%m-%d %H:%M").timetuple())
+            xdata1 = np.asarray(fig.data[0].x)
+            xdata2 = np.asarray(fig.data[1].x)
+        else:
+            xaxis_range0_ts = xaxis_range[0]
+            xaxis_range1_ts = xaxis_range[1]
+            xdata1 = data.ts
+            xdata2 = data_cut.ts
+        # Get all the relevant indices for the data-points which are included in the current zoom
+        inds1 = ((xaxis_range0_ts <= data.ts) & (data.ts <= xaxis_range1_ts) &
+                (yaxis_range[0] <= data.tdiff) & (data.tdiff <= yaxis_range[1]))
+        inds2 = ((xaxis_range0_ts <= data_cut.ts) & (data_cut.ts <= xaxis_range1_ts) &
+                (yaxis_range[0] <= data_cut.tdiff) & (data_cut.tdiff <= yaxis_range[1]))
+        # Update the Histograms
+        with fig.batch_update():
+            fig.data[3].x = xdata1[inds1] # are the histograms
+            fig.data[4].y = data.tdiff[inds1] # are the histograms
+            fig.data[5].x = xdata2[inds2] # are the histograms
+            fig.data[6].y = data_cut.tdiff[inds2] # are the histograms
+
+
+    fig = go.FigureWidget(data=plot_data, layout=layout)
+    fig.update_layout(barmode='overlay')
+
+    fig.layout.on_change(do_zoom, 'xaxis.range', 'yaxis.range')
+
+    return(fig)
